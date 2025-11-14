@@ -1,3 +1,9 @@
+use bevy::prelude::*;
+mod game;
+
 fn main() {
-    println!("Hello, world!");
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_plugins(crate::game::PlatformerGamePlugin)
+        .run();
 }
