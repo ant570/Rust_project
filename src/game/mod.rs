@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 mod world;
 use world::spawn_map;
+pub mod position;
 
 pub struct PlatformerGamePlugin;
 
