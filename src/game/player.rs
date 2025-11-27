@@ -44,17 +44,18 @@ pub fn player_movement(
         let mut movement_y = 0.0;
 
         //Movement x
-        if keyboard_input.pressed(KeyCode::KeyD){
+        if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
             movement_x = time.delta_secs() 
         }
-        if keyboard_input.pressed(KeyCode::KeyA){
+        if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft){
             movement_x = time.delta_secs() * -1.0;
         }
         player.pos.x += movement_x * player.speed_x;
         transform.translation.x += movement_x * player.speed_x;
 
         //Movement y
-        if keyboard_input.pressed(KeyCode::Space) || keyboard_input.pressed(KeyCode::KeyW){
+        if keyboard_input.pressed(KeyCode::Space) ||
+                keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp){
             movement_y = time.delta_secs() * player.jump_speed;
         }
         movement_y -= player.gravity;
