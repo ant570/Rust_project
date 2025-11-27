@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Position2{
     pub x: f32,
     pub y: f32,
