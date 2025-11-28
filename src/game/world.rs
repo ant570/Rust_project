@@ -1,73 +1,111 @@
-use bevy::prelude::*; 
+use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
+
+const TILE_SIZE: f32 = 50.0;
+
+const GRID_COLS: i32 = 50;
+const GRID_ROWS: i32 = 40;
+
+const WORLD_WIDTH: f32 = GRID_COLS as f32 * TILE_SIZE;
+const WORLD_HEIGHT: f32 = GRID_ROWS as f32 * TILE_SIZE;
 
 #[derive(Component)]
-pub struct Ground {
-    pub width: f32,
-    pub height: f32,
+pub struct Tile {
+    pub size: Vec2,
+    pub kind: TileType,
 }
 
-#[derive(Component)]
-pub struct Platform {
-    pub width: f32,
-    pub height: f32,
-    pub moving: bool,
+pub enum TileType {
+    Ground,
+    Platform { moving: bool },
+    Wall,
 }
 
-#[derive(Component)]
-pub struct Wall {
-    pub width: f32,
-    pub height: f32,
+pub fn spawn_camera(mut commands: Commands) {
+    let projection = Projection::from(OrthographicProjection {
+        scaling_mode: bevy::camera::ScalingMode::FixedVertical {
+            viewport_height: WORLD_HEIGHT,
+        },
+        ..OrthographicProjection::default_2d()
+    });
+
+    commands.spawn((
+        Camera2d,
+        projection,
+    ));
 }
 
-impl Ground {
-    pub fn new(width: f32, height: f32) -> Self {
-        Ground { width, height }
-    }
-}
+pub fn spawn_map(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
+    let ground_texture: Handle<Image> = asset_server.load("tiles/stone.png");
+    let wall_texture: Handle<Image> = asset_server.load("tiles/wall.png");
+    let platform_texture: Handle<Image> = asset_server.load("tiles/platform.png");
 
-impl Platform {
-    pub fn new(width: f32, height: f32, moving: bool) -> Self {
-        Platform {
-            width,
-            height,
-            moving,
+    let tile_size = Vec2::new(TILE_SIZE, TILE_SIZE);
+
+    let grid_width = WORLD_WIDTH;
+    let grid_height = WORLD_HEIGHT;
+
+    let start_x = -grid_width / 2.0 + TILE_SIZE / 2.0;
+    let start_y = -grid_height / 2.0 + TILE_SIZE / 2.0;
+
+    for row in 0..GRID_ROWS {
+        for col in 0..GRID_COLS {
+            let x = start_x + col as f32 * TILE_SIZE;
+            let y = start_y + row as f32 * TILE_SIZE;
+
+            let mut entity = commands.spawn((
+                Sprite {
+                    custom_size: Some(tile_size),
+                    color: Color::srgba(1.0, 1.0, 1.0, 0.05),
+                    ..default()
+                },
+                Transform::from_xyz(x, y, 0.0),
+            ));
+
+            if row == 0 {
+                entity.insert((
+                    Sprite {
+                        image: ground_texture.clone(),
+                        custom_size: Some(tile_size),
+                        ..default()
+                    },
+                    Tile {
+                        size: tile_size,
+                        kind: TileType::Ground,
+                    },
+                ));
+            }
+
+            else if col == 0 {
+                entity.insert((
+                    Sprite {
+                        image: wall_texture.clone(),
+                        custom_size: Some(tile_size),
+                        ..default()
+                    },
+                    Tile {
+                        size: tile_size,
+                        kind: TileType::Wall,
+                    },
+                ));
+            }
+
+            else if col == GRID_COLS - 1 {
+                entity.insert((
+                    Sprite {
+                        image: wall_texture.clone(),
+                        custom_size: Some(tile_size),
+                        ..default()
+                    },
+                    Tile {
+                        size: tile_size,
+                        kind: TileType::Wall,
+                    },
+                ));
+            }
         }
     }
-}
-
-impl Wall {
-    pub fn new(width: f32, height: f32) -> Self {
-        Wall { width, height }
-    }
-}
-
-pub fn spawn_map(mut commands: Commands) {
-    commands.spawn(Camera2d);
-
-    commands.spawn((
-        Sprite::from_color(
-            Color::srgb(0.3, 0.5, 0.3),
-            Vec2::new(800.0, 50.0),
-        ),
-        Transform::from_xyz(0.0, -200.0, 0.0),
-        Ground::new(800.0, 50.0),
-    ));
-
-    commands.spawn((
-        Sprite::from_color(
-            Color::srgb(0.5, 0.3, 0.3),
-            Vec2::new(200.0, 20.0),
-        ),
-        Transform::from_xyz(0.0, 0.0, 0.0),
-        Platform::new(200.0, 20.0, false),
-    ));
-
-    commands.spawn((
-        Sprite::from_color(
-            Color::srgb(0.3, 0.3, 0.5),
-            Vec2::new(50.0, 300.0),
-        ),
-        Transform::from_xyz(-400.0, 0.0, 0.0),
-        Wall::new(50.0, 300.0),
-    ));
 }
