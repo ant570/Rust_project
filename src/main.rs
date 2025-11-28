@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use bevy::window::{MonitorSelection, WindowMode};
 
-mod game;
-use crate::game::position::Position2;
-use crate::game::player::spawn_player;
- use crate::game::player::player_movement;
+mod world;
+mod player;
+use crate::player::position::Position2;
+use crate::player::spawn::spawn_player;
+use crate::player::spawn::player_movement;
  
 fn main() {
     App::new()
@@ -16,7 +17,7 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins(crate::game::PlatformerGamePlugin)
+        .add_plugins(crate::world::PlatformerGamePlugin)
         .add_systems(Startup, spawn_player)
         .add_systems(Update, player_movement)
         .run();

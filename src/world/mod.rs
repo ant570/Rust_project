@@ -1,15 +1,11 @@
 use bevy::prelude::*;
-mod world;
-use world::spawn_map;
-pub mod position;
-pub mod player;
-
 pub struct PlatformerGamePlugin;
 
+mod spawn;
 
 impl Plugin for PlatformerGamePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, (world::spawn_camera, world::spawn_map));
+            .add_systems(Startup, (spawn::spawn_camera, spawn::spawn_map));
     }
 }
