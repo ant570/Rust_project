@@ -10,6 +10,7 @@ pub struct Player{
 }
 
 
+
 impl Player{
     pub fn new(x: f32, y: f32, speed_x: f32, jump_speed: f32, gravity: f32) -> Self {
         Player{
@@ -21,15 +22,20 @@ impl Player{
     }
 }
 
-pub fn spawn_player(mut commands: Commands) {
+pub fn spawn_player(mut commands: Commands,  asset_server: Res<AssetServer>) {
     commands.spawn(Camera2d);
-
+    let texture_handle: Handle<Image> = asset_server.load("mario1.jpg");
     commands.spawn((
-        Sprite::from_color(
-            Color::srgb(0.3, 0.0, 0.6),
-            Vec2::new(50.0, 50.0),
-        ),
+        // 1. Dwa komponenty transformacji
         Transform::from_xyz(0.0, 0.0, 0.0),
+        GlobalTransform::default(), // KLUCZOWY komponent do renderowania
+        
+        // 2. Komponent wizualny
+        Sprite {
+            image: texture_handle, 
+            ..default()
+        },
+        // 3. Komponent gracza
         Player::new(50.0, 50.0, 50.0, 100.0, 1.0),
     ));
 }
