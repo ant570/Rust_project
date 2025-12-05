@@ -14,6 +14,7 @@ pub struct Player{
     pub jump_speed: f32,
     pub gravity: f32,
     pub control: Control,
+    pub movement: bool,
 }
 
 
@@ -23,13 +24,14 @@ pub enum Control{
 }
 
 impl Player{
-    pub fn new(x: f32, y: f32, speed_x: f32, jump_speed: f32, gravity: f32, control: Control) -> Self {
+    pub fn new(x: f32, y: f32, speed_x: f32, jump_speed: f32, gravity: f32, control: Control, movement: bool) -> Self {
         Player{
             pos : Position2::new(x, y),
             speed_x,
             jump_speed,
             gravity,
-            control
+            control,
+            movement
         }
     }
 }
@@ -43,6 +45,7 @@ pub fn spawn_players(
         asset_server.load("players/player1.png"),
         200.0, 0.0,
         Arrows,
+        true,
     );
 
     spawn_player(
@@ -50,6 +53,7 @@ pub fn spawn_players(
         asset_server.load("players/player2.png"),
         -200.0, 0.0,
         Wasd,
+        true,
     );
 
 
@@ -61,6 +65,7 @@ pub fn spawn_player(
     x : f32,
     y : f32,
     control: Control,
+    movement: bool,
 ) {
     let player_size = Vec2::new(PLAYER_HEIGHT, PLAYER_HEIGHT);
     let mut entity = commands.spawn((
@@ -70,7 +75,7 @@ pub fn spawn_player(
             ..default()
         },
         Transform::from_xyz(x, y, 0.0),
-        Player::new(x, y, 100.0, 150.0, 1.0, control),
+        Player::new(x, y, 100.0, 150.0, 1.0, control, movement),
     ));
 }
 
@@ -80,6 +85,21 @@ pub fn player_movement(
     time: Res<Time>,
 ) {
     for (mut transform, mut player) in query.iter_mut(){
+        
+        if keyboard_input.pressed(KeyCode::Space) {
+            if(player.movement == true){
+                player.movement = false;
+            }
+            else{
+                player.movement = true;
+            }
+            continue;
+        }
+
+        if !player.movement{
+            continue;
+        }
+
         let mut movement_x = 0.0;
         let mut movement_y = 0.0;
 
@@ -99,6 +119,9 @@ pub fn player_movement(
                 }
             }
             Control::Arrows => {
+                if !player.movement{
+                    continue;
+                }
                 //Movement x
                 if keyboard_input.pressed(KeyCode::ArrowRight) {
                     movement_x = time.delta_secs() ;
