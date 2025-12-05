@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use crate::player::position::Position2;
 use bevy::window::PrimaryWindow;
 use crate::player::spawn::Control::Wasd;
+use crate::player::spawn::Control::Arrows;
 
 const PLAYER_WIDTH: f32 = 200.0;
 const PLAYER_HEIGHT: f32 = 200.0;
@@ -18,7 +19,7 @@ pub struct Player{
 
 pub enum Control{
     Wasd,
-    Arrows2
+    Arrows
 }
 
 impl Player{
@@ -41,7 +42,7 @@ pub fn spawn_players(
         &mut commands,
         asset_server.load("players/player1.png"),
         200.0, 0.0,
-        Wasd
+        Arrows,
     );
 
     spawn_player(
@@ -85,20 +86,32 @@ pub fn player_movement(
         match player.control {
             Control::Wasd => {
                 //Movement x
-                if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
+                if keyboard_input.pressed(KeyCode::KeyD) {
                     movement_x = time.delta_secs() ;
                 }
-                if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft){
+                if keyboard_input.pressed(KeyCode::KeyA){
                     movement_x = time.delta_secs() * -1.0;
                 }
 
                 //Movement y
-                if keyboard_input.pressed(KeyCode::Space) ||
-                    keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp){
+                if keyboard_input.pressed(KeyCode::KeyW) {
                     movement_y = time.delta_secs() * player.jump_speed;
                 }
             }
-            Control::Arrows2 => todo!()
+            Control::Arrows => {
+                //Movement x
+                if keyboard_input.pressed(KeyCode::ArrowRight) {
+                    movement_x = time.delta_secs() ;
+                }
+                if keyboard_input.pressed(KeyCode::ArrowLeft){
+                    movement_x = time.delta_secs() * -1.0;
+                }
+
+                //Movement y
+                if keyboard_input.pressed(KeyCode::ArrowUp){
+                    movement_y = time.delta_secs() * player.jump_speed;
+                }
+            }
         }
 
         player.pos.x += movement_x * player.speed_x;
