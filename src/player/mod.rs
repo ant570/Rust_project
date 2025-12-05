@@ -7,7 +7,7 @@ pub mod position;
 impl Plugin for PlatformerGamePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, spawn::spawn_player)
+            .add_systems(Startup, spawn::spawn_players)
             .add_systems(Update, spawn::player_movement);
     }
 }

@@ -25,15 +25,31 @@ impl Player{
     }
 }
 
-pub fn spawn_players(mut commands: Commands){
+pub fn spawn_players(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+){
+    spawn_player(
+        &mut commands,
+        asset_server.load("players/player1.png"),
+        200.0, 0.0
+    );
+
+    spawn_player(
+        &mut commands,
+        asset_server.load("players/player2.png"),
+        -200.0, 0.0
+    );
+
 
 }
 
 pub fn spawn_player(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>
+    commands: &mut Commands,
+    player_texture : Handle<Image>,
+    x : f32,
+    y : f32,
 ) {
-    let player_texture: Handle<Image> = asset_server.load("players/player1.png");
     let player_size = Vec2::new(PLAYER_HEIGHT, PLAYER_HEIGHT);
     let mut entity = commands.spawn((
         Sprite{
@@ -41,8 +57,8 @@ pub fn spawn_player(
             image: player_texture,
             ..default()
         },
-        Transform::from_xyz(0.0, 0.0, 0.0),
-        Player::new(PLAYER_HEIGHT, PLAYER_WIDTH, 50.0, 100.0, 1.0)
+        Transform::from_xyz(x, y, 0.0),
+        Player::new(PLAYER_HEIGHT, PLAYER_WIDTH, x, y, 0.0)
     ));
 }
 
