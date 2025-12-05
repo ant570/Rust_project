@@ -1,5 +1,13 @@
 use bevy::prelude::*;
 use crate::player::position::Position2;
+use bevy::window::PrimaryWindow;
+use crate::player::spawn::Control::Wasd;
+use crate::player::spawn::Control::Arrows;
+use bevy::app::AppExit;
+use std::process;
+
+const PLAYER_WIDTH: f32 = 200.0;
+const PLAYER_HEIGHT: f32 = 200.0;
 
 #[derive(Component)]
 pub struct Player{
@@ -7,31 +15,97 @@ pub struct Player{
     pub speed_x: f32,
     pub jump_speed: f32,
     pub gravity: f32,
+    pub control: Control,
+    pub movement: bool,
 }
 
 
+pub enum Control{
+    Wasd,
+    Arrows
+}
+
 impl Player{
-    pub fn new(x: f32, y: f32, speed_x: f32, jump_speed: f32, gravity: f32) -> Self {
+    pub fn new(x: f32, y: f32, speed_x: f32, jump_speed: f32, gravity: f32, control: Control, movement: bool) -> Self {
         Player{
             pos : Position2::new(x, y),
             speed_x,
             jump_speed,
             gravity,
+            control,
+            movement
         }
     }
 }
 
-pub fn spawn_player(mut commands: Commands) {
-    commands.spawn(Camera2d);
+pub fn spawn_players(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+){
+    spawn_player(
+        &mut commands,
+        asset_server.load("players/player1.png"),
+        200.0, 0.0,
+        Arrows,
+        true,
+    );
 
-    commands.spawn((
-        Sprite::from_color(
-            Color::srgb(0.3, 0.0, 0.6),
-            Vec2::new(50.0, 50.0),
-        ),
-        Transform::from_xyz(0.0, 0.0, 0.0),
-        Player::new(50.0, 50.0, 50.0, 100.0, 1.0),
+    spawn_player(
+        &mut commands,
+        asset_server.load("players/player2.png"),
+        -200.0, 0.0,
+        Wasd,
+        true,
+    );
+
+
+}
+
+pub fn spawn_player(
+    commands: &mut Commands,
+    player_texture : Handle<Image>,
+    x : f32,
+    y : f32,
+    control: Control,
+    movement: bool,
+) {
+    let player_size = Vec2::new(PLAYER_HEIGHT, PLAYER_HEIGHT);
+    let mut entity = commands.spawn((
+        Sprite{
+            custom_size: Some(player_size),
+            image: player_texture,
+            ..default()
+        },
+        Transform::from_xyz(x, y, 0.0),
+        Player::new(x, y, 100.0, 150.0, 1.0, control, movement),
     ));
+}
+
+pub fn keyboard_input(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut query: Query<(&mut Transform, &mut Player)>,
+    time: Res<Time>,
+    mut app_exit_events: MessageWriter<AppExit>,
+){
+    //Zakończenie gry 
+    if keyboard_input.just_pressed(KeyCode::Escape){
+        process::exit(0);
+    }
+    else if keyboard_input.just_pressed(KeyCode::Space) {
+        //Zapauzowanie gry
+        for (mut transform, mut player) in query.iter_mut(){
+            if player.movement == true {
+                player.movement = false;
+            }
+            else{
+                player.movement = true;
+            }
+        }
+    }
+    else{
+        //Ruch gracza
+        player_movement(keyboard_input, query, time);
+    }
 }
 
 pub fn player_movement(
@@ -40,26 +114,54 @@ pub fn player_movement(
     time: Res<Time>,
 ) {
     for (mut transform, mut player) in query.iter_mut(){
+
+        //Sprawdzenie czy nie jest zatrzymany
+        if !player.movement{
+            continue;
+        }
+
         let mut movement_x = 0.0;
         let mut movement_y = 0.0;
 
-        //Movement x
-        if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
-            movement_x = time.delta_secs() 
+        //Ruch gracza w zalezności od typu sterowania.
+        match player.control {
+            Control::Wasd => {
+                //Movement x
+                if keyboard_input.pressed(KeyCode::KeyD) {
+                    movement_x = time.delta_secs() ;
+                }
+                if keyboard_input.pressed(KeyCode::KeyA){
+                    movement_x = time.delta_secs() * -1.0;
+                }
+
+                //Movement y
+                if keyboard_input.pressed(KeyCode::KeyW) {
+                    movement_y = time.delta_secs() * player.jump_speed;
+                }
+            }
+            Control::Arrows => {
+                if !player.movement{
+                    continue;
+                }
+                //Movement x
+                if keyboard_input.pressed(KeyCode::ArrowRight) {
+                    movement_x = time.delta_secs() ;
+                }
+                if keyboard_input.pressed(KeyCode::ArrowLeft){
+                    movement_x = time.delta_secs() * -1.0;
+                }
+
+                //Movement y
+                if keyboard_input.pressed(KeyCode::ArrowUp){
+                    movement_y = time.delta_secs() * player.jump_speed;
+                }
+            }
         }
-        if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft){
-            movement_x = time.delta_secs() * -1.0;
-        }
+
         player.pos.x += movement_x * player.speed_x;
         transform.translation.x += movement_x * player.speed_x;
-
-        //Movement y
-        if keyboard_input.pressed(KeyCode::Space) ||
-                keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp){
-            movement_y = time.delta_secs() * player.jump_speed;
-        }
         movement_y -= player.gravity;
-        player.pos.y += movement_y;
+        player.pos.y += movement_y; //grawitacja
         transform.translation.y += movement_y;
         
     }
