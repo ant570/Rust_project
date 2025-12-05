@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 use crate::player::position::Position2;
+use bevy::window::PrimaryWindow;
+
+const PLAYER_WIDTH: f32 = 200.0;
+const PLAYER_HEIGHT: f32 = 200.0;
 
 #[derive(Component)]
 pub struct Player{
@@ -21,16 +25,24 @@ impl Player{
     }
 }
 
-pub fn spawn_player(mut commands: Commands) {
-    commands.spawn(Camera2d);
+pub fn spawn_players(mut commands: Commands){
 
-    commands.spawn((
-        Sprite::from_color(
-            Color::srgb(0.3, 0.0, 0.6),
-            Vec2::new(50.0, 50.0),
-        ),
+}
+
+pub fn spawn_player(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>
+) {
+    let player_texture: Handle<Image> = asset_server.load("players/player1.png");
+    let player_size = Vec2::new(PLAYER_HEIGHT, PLAYER_HEIGHT);
+    let mut entity = commands.spawn((
+        Sprite{
+            custom_size: Some(player_size),
+            image: player_texture,
+            ..default()
+        },
         Transform::from_xyz(0.0, 0.0, 0.0),
-        Player::new(50.0, 50.0, 50.0, 100.0, 1.0),
+        Player::new(PLAYER_HEIGHT, PLAYER_WIDTH, 50.0, 100.0, 1.0)
     ));
 }
 

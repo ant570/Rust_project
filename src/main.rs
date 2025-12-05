@@ -18,10 +18,6 @@ fn main() {
             ..default()
         }))
         .add_plugins(crate::world::PlatformerGamePlugin)
-        .add_systems(Startup, spawn_player)
-        .add_systems(Update, player_movement)
+        .add_plugins(crate::player::PlatformerGamePlugin)
         .run();
-
-    let pos = Position2::new(10.0, 20.0);
-    pos.to_str();
 }
