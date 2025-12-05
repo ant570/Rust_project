@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::player::position::Position2;
 use bevy::window::PrimaryWindow;
+use crate::player::spawn::Control::Wasd;
 
 const PLAYER_WIDTH: f32 = 200.0;
 const PLAYER_HEIGHT: f32 = 200.0;
@@ -11,16 +12,23 @@ pub struct Player{
     pub speed_x: f32,
     pub jump_speed: f32,
     pub gravity: f32,
+    pub control: Control,
 }
 
 
+pub enum Control{
+    Wasd,
+    Arrows2
+}
+
 impl Player{
-    pub fn new(x: f32, y: f32, speed_x: f32, jump_speed: f32, gravity: f32) -> Self {
+    pub fn new(x: f32, y: f32, speed_x: f32, jump_speed: f32, gravity: f32, control: Control) -> Self {
         Player{
             pos : Position2::new(x, y),
             speed_x,
             jump_speed,
             gravity,
+            control
         }
     }
 }
@@ -32,13 +40,15 @@ pub fn spawn_players(
     spawn_player(
         &mut commands,
         asset_server.load("players/player1.png"),
-        200.0, 0.0
+        200.0, 0.0,
+        Wasd
     );
 
     spawn_player(
         &mut commands,
         asset_server.load("players/player2.png"),
-        -200.0, 0.0
+        -200.0, 0.0,
+        Wasd,
     );
 
 
@@ -49,6 +59,7 @@ pub fn spawn_player(
     player_texture : Handle<Image>,
     x : f32,
     y : f32,
+    control: Control,
 ) {
     let player_size = Vec2::new(PLAYER_HEIGHT, PLAYER_HEIGHT);
     let mut entity = commands.spawn((
@@ -58,7 +69,7 @@ pub fn spawn_player(
             ..default()
         },
         Transform::from_xyz(x, y, 0.0),
-        Player::new(PLAYER_HEIGHT, PLAYER_WIDTH, x, y, 0.0)
+        Player::new(x, y, 100.0, 150.0, 1.0, control),
     ));
 }
 
@@ -71,21 +82,27 @@ pub fn player_movement(
         let mut movement_x = 0.0;
         let mut movement_y = 0.0;
 
-        //Movement x
-        if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
-            movement_x = time.delta_secs() 
+        match player.control {
+            Control::Wasd => {
+                //Movement x
+                if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
+                    movement_x = time.delta_secs() ;
+                }
+                if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft){
+                    movement_x = time.delta_secs() * -1.0;
+                }
+
+                //Movement y
+                if keyboard_input.pressed(KeyCode::Space) ||
+                    keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp){
+                    movement_y = time.delta_secs() * player.jump_speed;
+                }
+            }
+            Control::Arrows2 => todo!()
         }
-        if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft){
-            movement_x = time.delta_secs() * -1.0;
-        }
+
         player.pos.x += movement_x * player.speed_x;
         transform.translation.x += movement_x * player.speed_x;
-
-        //Movement y
-        if keyboard_input.pressed(KeyCode::Space) ||
-                keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp){
-            movement_y = time.delta_secs() * player.jump_speed;
-        }
         movement_y -= player.gravity;
         player.pos.y += movement_y;
         transform.translation.y += movement_y;
