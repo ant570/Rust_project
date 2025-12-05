@@ -3,6 +3,8 @@ use crate::player::position::Position2;
 use bevy::window::PrimaryWindow;
 use crate::player::spawn::Control::Wasd;
 use crate::player::spawn::Control::Arrows;
+use bevy::app::AppExit;
+use std::process;
 
 const PLAYER_WIDTH: f32 = 200.0;
 const PLAYER_HEIGHT: f32 = 200.0;
@@ -79,23 +81,41 @@ pub fn spawn_player(
     ));
 }
 
+pub fn keyboard_input(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut query: Query<(&mut Transform, &mut Player)>,
+    time: Res<Time>,
+    mut app_exit_events: MessageWriter<AppExit>,
+){
+    //Zakończenie gry 
+    if keyboard_input.just_pressed(KeyCode::Escape){
+        process::exit(0);
+    }
+    else if keyboard_input.just_pressed(KeyCode::Space) {
+        //Zapauzowanie gry
+        for (mut transform, mut player) in query.iter_mut(){
+            if player.movement == true {
+                player.movement = false;
+            }
+            else{
+                player.movement = true;
+            }
+        }
+    }
+    else{
+        //Ruch gracza
+        player_movement(keyboard_input, query, time);
+    }
+}
+
 pub fn player_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut Transform, &mut Player)>,
     time: Res<Time>,
 ) {
     for (mut transform, mut player) in query.iter_mut(){
-        
-        if keyboard_input.pressed(KeyCode::Space) {
-            if(player.movement == true){
-                player.movement = false;
-            }
-            else{
-                player.movement = true;
-            }
-            continue;
-        }
 
+        //Sprawdzenie czy nie jest zatrzymany
         if !player.movement{
             continue;
         }
@@ -103,6 +123,7 @@ pub fn player_movement(
         let mut movement_x = 0.0;
         let mut movement_y = 0.0;
 
+        //Ruch gracza w zalezności od typu sterowania.
         match player.control {
             Control::Wasd => {
                 //Movement x
@@ -140,7 +161,7 @@ pub fn player_movement(
         player.pos.x += movement_x * player.speed_x;
         transform.translation.x += movement_x * player.speed_x;
         movement_y -= player.gravity;
-        player.pos.y += movement_y;
+        player.pos.y += movement_y; //grawitacja
         transform.translation.y += movement_y;
         
     }
