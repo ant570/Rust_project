@@ -139,7 +139,6 @@ pub fn players_collsions(
     mut query: Query<(&Transform, &Collider, &Player)>
 ){
     query.iter_combinations().for_each(|[player1, player2]| {
-        println!("huhu");
         let (transform1, collider1, _) = player1;
         let (transform2, collider2, _) = player2;
         
