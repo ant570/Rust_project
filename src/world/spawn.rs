@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
+use crate::world::platforms::PlatformMover;
+
 const TILE_SIZE: f32 = 50.0;
 
 const GRID_COLS: i32 = 50;
@@ -15,9 +17,10 @@ pub struct Tile {
     pub kind: TileType,
 }
 
+
 pub enum TileType {
     Ground,
-    Platform { moving: bool },
+    Platform,
     Wall,
 }
 
@@ -107,5 +110,60 @@ pub fn spawn_map(
                 ));
             }
         }
+    }
+
+
+    // platforms 
+    let platform_positions_static = vec![
+        (5, 5),
+        (15, 15),
+        (25, 25),
+    ];
+
+    for (col, row) in platform_positions_static {
+        let x = start_x + col as f32 * TILE_SIZE;
+        let y = start_y + row as f32 * TILE_SIZE;
+
+        let platform_size = Vec2::new(3.0 * TILE_SIZE, TILE_SIZE);
+
+        commands.spawn((
+            Sprite {
+                image: platform_texture.clone(),
+                custom_size: Some(platform_size),
+                ..default()
+            },
+            Transform::from_xyz(x, y, 0.0),
+            Tile {
+                size: platform_size,
+                kind: TileType::Platform,
+            },
+        ));
+    }
+
+    let platform_positions_moving = vec![
+        (10, 10),
+        (20, 20),
+        (30, 30),
+    ];
+
+    for (col, row) in platform_positions_moving {
+        let x = start_x + col as f32 * TILE_SIZE;
+        let y = start_y + row as f32 * TILE_SIZE;
+
+        let platform_size = Vec2::new(3.0 * TILE_SIZE, TILE_SIZE);
+
+        commands.spawn((
+            Sprite {
+                image: platform_texture.clone(),
+                custom_size: Some(platform_size),
+                ..default()
+            },
+            Transform::from_xyz(x, y, 0.0),
+            Tile {
+                size: platform_size,
+                kind: TileType::Platform,
+            },
+            PlatformMover::horizontal(Vec3::new(x, y, 0.0), 50.0, 2.0)
+        ));
     }
 }
