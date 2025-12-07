@@ -38,6 +38,11 @@ impl Player{
     }
 }
 
+#[derive(Component)]
+pub struct Collider{
+    pub half_size: Vec2,
+}
+
 pub fn spawn_players(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -78,7 +83,13 @@ pub fn spawn_player(
         },
         Transform::from_xyz(x, y, 0.0),
         Player::new(x, y, 100.0, 150.0, 1.0, control, movement),
+        Collider{
+            half_size: Vec2::new(PLAYER_HEIGHT / 2.0, PLAYER_WIDTH / 2.0),
+        },
+    
     ));
+
+    
 }
 
 pub fn keyboard_input(
@@ -106,6 +117,41 @@ pub fn keyboard_input(
         //Ruch gracza
         player_movement(keyboard_input, query, time);
     }
+}
+pub fn make_rect(
+    transform: &Transform,
+    collider: &Collider,
+) -> Rect {
+    Rect{
+        //left_bottom point
+        min: transform.translation.truncate() - collider.half_size,
+        //right_up point
+        max: transform.translation.truncate() + collider.half_size
+    }
+}
+
+fn intersects(a: &Rect, b: &Rect) -> bool {
+    a.min.x < b.max.x && a.max.x > b.min.x &&
+    a.min.y < b.max.y && a.max.y > b.min.y
+}
+
+pub fn players_collsions(
+    mut query: Query<(&Transform, &Collider, &Player)>
+){
+    query.iter_combinations().for_each(|[player1, player2]| {
+        println!("huhu");
+        let (transform1, collider1, _) = player1;
+        let (transform2, collider2, _) = player2;
+        
+        let rect1 =  make_rect(transform1, collider1);
+        let rect2 = make_rect(transform2, collider2);
+
+        if intersects(&rect1, &rect2) {
+            process::exit(0);
+        }
+
+    }
+    );
 }
 
 pub fn player_movement(
