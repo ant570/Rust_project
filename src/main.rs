@@ -3,6 +3,7 @@ use bevy::window::{MonitorSelection, WindowMode};
 
 mod world;
 mod player;
+mod physics;
 use crate::player::position::Position2;
 use crate::player::spawn::spawn_player;
 use crate::player::spawn::player_movement;
@@ -19,5 +20,6 @@ fn main() {
         }))
         .add_plugins(crate::world::PlatformerGamePlugin)
         .add_plugins(crate::player::PlatformerGamePlugin)
+        .add_plugins(crate::physics::PlatformerGamePluginCollision)
         .run();
 }

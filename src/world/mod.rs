@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 pub struct PlatformerGamePlugin;
 
-mod spawn;
-mod platforms;
+pub mod spawn;
+pub mod platforms;
 
 impl Plugin for PlatformerGamePlugin {
     fn build(&self, app: &mut App) {
