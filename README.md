@@ -5,9 +5,9 @@
 
     [x] Zaimplementowanie sterowania (Ruch poziomy i skok: WASD/Strzałki).
 
-    [ ] Zaimplementowanie pojawiania się platform.
+    [x] Zaimplementowanie pojawiania się platform.
 
-    [ ] Zaimplementowanie fizyki (Grawitacja, prędkości).
+    [x] Zaimplementowanie fizyki (Grawitacja, prędkości).
 
     [ ] Zaimplementowanie kolizji z platformami.
 
@@ -15,7 +15,7 @@
 
     [ ] Prosty reset po spadnięciu poza mapę.
 
-    [ ] Uproszczona lub prymitywna grafika.
+    [x] Uproszczona lub prymitywna grafika.
 
 🎧 Iteracja 2: Szlifowanie i Ulepszenia UX/UI
 
