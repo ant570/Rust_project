@@ -5,6 +5,7 @@ use crate::player::spawn::Control::Wasd;
 use crate::player::spawn::Control::Arrows;
 use bevy::app::AppExit;
 use std::process;
+ use crate::world::platforms::PlatformMover;
 
 const PLAYER_WIDTH: f32 = 200.0;
 const PLAYER_HEIGHT: f32 = 200.0;
@@ -297,5 +298,13 @@ pub fn player_movement(
         player.pos.y += movement_y; //grawitacja
         transform.translation.y += movement_y;
         
+    }
+
+    pub fn collisions_with_platforms(
+        mut player_query: Query<(&mut Transform, &Collider), With<Player>>,
+        platform_query: Query<(&Transform, &Collider), With<PlatformMover>>,
+    )
+    {
+
     }
 }
