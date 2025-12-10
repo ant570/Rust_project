@@ -137,6 +137,7 @@ pub fn spawn_map(
                 size: platform_size,
                 kind: TileType::Platform,
             },
+            PlatformMover::falling_only(Vec3::new(x, y, 0.0), 1.0)
         ));
     }
 
@@ -144,6 +145,7 @@ pub fn spawn_map(
         (10, 10),
         (20, 20),
         (30, 30),
+        (40, 40),
     ];
 
     for (col, row) in platform_positions_moving {
@@ -163,7 +165,7 @@ pub fn spawn_map(
                 size: platform_size,
                 kind: TileType::Platform,
             },
-            PlatformMover::horizontal(Vec3::new(x, y, 0.0), 50.0, 2.0)
+            PlatformMover::horizontal(Vec3::new(x, y, 0.0), 400.0, 0.5, 0.3)
         ));
     }
 }
