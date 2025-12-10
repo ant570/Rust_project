@@ -154,6 +154,31 @@ fn intersects(a: &Rect, b: &Rect) -> bool {
     a.min.y < b.max.y && a.max.y > b.min.y
 }
 
+pub fn claculate_collision(rect1: Rect, rect2: Rect) -> Vec2{
+    let center1 = (rect1.min + rect1.max) / 2.0;
+    let center2 = (rect2.min + rect2.max) / 2.0;
+
+    let size1= rect1.max - rect1.min;
+    let size2 = rect2.max - rect2.min;
+
+    let distance= center2 - center1;;
+    let max_distance = (size1 + size2) / 2.0;
+
+    let overlap_x = max_distance.x - distance.x.abs();
+    let overlap_y = max_distance.y - distance.y.abs();
+
+    if overlap_x <= 0.0 || overlap_y <= 0.0 {
+        return Vec2::new(0.0, 0.0); 
+    }
+    
+    if overlap_x < overlap_y {
+        // x collision
+        Vec2::new(distance.x, 0.0)
+    } else {
+        // y collision
+        Vec2::new(0.0, distance.y)
+    }
+}
 pub fn players_collsions(
     mut query: Query<(Entity, &mut Transform, &Collider, &Player)>
 ){
@@ -166,21 +191,12 @@ pub fn players_collsions(
         let rect2 = make_rect(transform2, collider2);
 
         if intersects(&rect1, &rect2) {
-            let center1 = (rect1.min + rect1.max) / 2.0;
-            let center2 = (rect2.min + rect2.max) / 2.0;
-
-            let size1= rect1.max - rect1.min;
-            let size2 = rect2.max - rect2.min;
-
-            let distance= center2 - center1;;
-            let max_distance = (size1 + size2) / 2.0;
-
-            let overlap_x = max_distance.x - distance.x.abs();
-            let overlap_y = max_distance.y - distance.y.abs();
-
-            if overlap_x < overlap_y{
+            
+            let details = claculate_collision(rect1, rect2);
+            if details[0] > 0.0{
                 //x collisions
-                if distance.x >= 0.0{
+                let distance = details[0];
+                if distance >= 0.0{
                     data_vector.push((
                         entity_id1,
                         player1_component.collision_reaction_x * -1.0,
@@ -193,7 +209,8 @@ pub fn players_collsions(
                         0.0,
                     ));
                 }
-                else{
+                else if distance > 0.0 {
+                    let distance = details[1];
                     data_vector.push((
                         entity_id1,
                         player1_component.collision_reaction_x,
@@ -207,9 +224,10 @@ pub fn players_collsions(
                     ));
                 }
             }
-            else{
+            else if details[1] > 0.0{
                 //y collisions
-                if distance.y >= 0.0{
+                let distance = details[1];
+                if distance >= 0.0{
                     data_vector.push((
                         entity_id2,
                         0.0,
