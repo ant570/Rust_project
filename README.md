@@ -11,7 +11,7 @@
 
     [ ] Zaimplementowanie kolizji z platformami.
 
-    [ ] Zaimplementowanie kolizji między graczami.
+    [x] Zaimplementowanie kolizji między graczami.
 
     [ ] Prosty reset po spadnięciu poza mapę.
 
