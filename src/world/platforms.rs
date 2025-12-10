@@ -1,49 +1,64 @@
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
+use crate::world::utils::WORLD_HEIGHT;
+use crate::world::utils::TILE_SIZE;
+
+
+const PLATFORM_BASE_FALL_SPEED: f32 = 150.0;
+const DESPAWN_Y: f32 = -WORLD_HEIGHT / 2.0 + TILE_SIZE  * 1.5;
 
 #[derive(Component)]
 pub struct PlatformMover {
-    pub amplitude: f32,
-    pub speed: f32,
     pub origin: Vec3,
     pub horizontal: bool,
+    pub amplitude: f32,   // jak daleko ma iść na boki
+    pub speed: f32,       // jak szybko ma się ruszać na boki
+    pub fall_factor: f32, // jak szybko ma spadać
 }
 
 impl PlatformMover {
-    pub fn horizontal(origin: Vec3, amplitude: f32, speed: f32) -> Self {
+    pub fn horizontal(origin: Vec3, amplitude: f32, speed: f32, fall_factor: f32) -> Self {
         Self {
-            amplitude,
-            speed,
             origin,
             horizontal: true,
+            amplitude,
+            speed,
+            fall_factor,
         }
     }
 
-    pub fn vertical(origin: Vec3, amplitude: f32, speed: f32) -> Self {
+    pub fn falling_only(origin: Vec3, fall_factor: f32) -> Self {
         Self {
-            amplitude,
-            speed,
             origin,
             horizontal: false,
+            amplitude: 0.0,
+            speed: 0.0,
+            fall_factor,
         }
     }
 }
 
-
 pub fn move_platforms_system(
     time: Res<Time>,
-    mut query: Query<(&PlatformMover, &mut Transform)>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &PlatformMover, &mut Transform)>,
 ) {
-    let t = time.elapsed_secs();
+    let t = time.elapsed_secs(); // do sinusa
+    let dt = time.delta_secs();  // do spadania
 
-    for (mover, mut transform) in &mut query {
-        let offset = (t * mover.speed).sin() * mover.amplitude;
-
-        if mover.horizontal {
-            transform.translation.x = mover.origin.x + offset;
-            transform.translation.y = mover.origin.y;
+    for (entity, mover, mut transform) in &mut query {
+        let horizontal_offset = if mover.horizontal {
+            (t * mover.speed).sin() * mover.amplitude
         } else {
-            transform.translation.y = mover.origin.y + offset;
-            transform.translation.x = mover.origin.x;
-        }
+            0.0
+        };
+
+        transform.translation.x = mover.origin.x + horizontal_offset;
+
+        transform.translation.y -= PLATFORM_BASE_FALL_SPEED * mover.fall_factor * dt;
+
+        if transform.translation.y < DESPAWN_Y {
+            commands.entity(entity).despawn();
+        } 
     }
 }
