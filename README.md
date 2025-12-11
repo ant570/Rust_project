@@ -1,5 +1,6 @@
-📅 Plan Rozwoju Gry (2 Iteracje)
-🚀 Iteracja 1: Fundamenty i Prototyp Gry
+Plan Rozwoju Gry (2 Iteracje)
+
+Iteracja 1: Fundamenty i Prototyp Gry
 
     [x] Renderowanie 2D.
 
@@ -13,11 +14,11 @@
 
     [x] Zaimplementowanie kolizji między graczami.
 
-    [ ] Prosty reset po spadnięciu poza mapę.
+    [ ] Prosty reset po spadnięciu poza mapę. (w tej chwili nie da się spaść poza obszar mapy, więc implementacja tego nie ma sensu)
 
     [x] Uproszczona lub prymitywna grafika.
 
-🎧 Iteracja 2: Szlifowanie i Ulepszenia UX/UI
+Iteracja 2:
 
     [ ] Efekty dźwiękowe.
 
