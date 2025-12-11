@@ -5,8 +5,8 @@ use crate::player::spawn::Control::Wasd;
 use crate::player::spawn::Control::Arrows;
 use bevy::app::AppExit;
 use std::process;
- use crate::world::platforms::PlatformMover;
- use std::ptr::null;
+use crate::world::platforms::PlatformMover;
+use std::ptr::null;
 
 const PLAYER_WIDTH: f32 = 200.0;
 const PLAYER_HEIGHT: f32 = 200.0;

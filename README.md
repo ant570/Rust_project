@@ -9,7 +9,7 @@
 
     [x] Zaimplementowanie fizyki (Grawitacja, prędkości).
 
-    [ ] Zaimplementowanie kolizji z platformami.
+    [x] Zaimplementowanie kolizji z platformami.
 
     [x] Zaimplementowanie kolizji między graczami.
 
