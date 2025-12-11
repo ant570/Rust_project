@@ -20,7 +20,7 @@ pub fn aabb_collision(
     let right_b = pos_b.x + half_b.x;
     let bottom_b = pos_b.y - half_b.y;
     let top_b = pos_b.y + half_b.y;
-
+    
     !(left_a > right_b
         || right_a < left_b
         || top_a < bottom_b     // Sprawdzeenie czy jest kolizja miedzy a i b, czy sie na siebie nachodza
@@ -28,19 +28,25 @@ pub fn aabb_collision(
 }
 
 pub fn player_with_tile_collision_system(
-    mut player_query: Query<(&mut Transform, &Sprite, &Player)>,
-    tile_query: Query<(&Transform, &Sprite, &Tile), Without<Player>>,
+    mut player_query: Query<(&mut Transform, &Sprite, &mut Player)>,
+    tile_query: Query<(Entity, &Transform, &Sprite, &Tile), Without<Player>>,
 ) {
-    for (mut player_transform, player_sprite, _player) in &mut player_query {
+    for (mut player_transform, player_sprite, mut _player) in &mut player_query {
         let mut player_pos = player_transform.translation.truncate();   // bez pozycji z osi z
         let player_size = player_sprite.custom_size.unwrap_or(Vec2::ZERO);
 
-        for (tile_transform, tile_sprite, tile) in &tile_query {
+        for (tile_entity, tile_transform, tile_sprite, tile) in &tile_query {
             let tile_size = tile.size;
             let tile_pos = tile_transform.translation.truncate();
             if !aabb_collision(player_pos, player_size, tile_pos, tile_size) {
+                if _player.collision == Some(tile_entity){
+                    _player.jump = false;
+                    _player.collision = Option::<Entity>::default();
+                }
                 continue;
             }
+            _player.collision = Some(tile_entity);
+            _player.jump = true;
             
             match tile.kind {
                 TileType::Ground | TileType::Wall | TileType::Platform => {
