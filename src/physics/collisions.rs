@@ -36,15 +36,14 @@ pub fn player_with_tile_collision_system(
         let player_size = player_sprite.custom_size.unwrap_or(Vec2::ZERO);
 
         for (tile_transform, tile_sprite, tile) in &tile_query {
-            let tile_size = tile_sprite.custom_size.unwrap_or(Vec2::ZERO);
+            let tile_size = tile.size;
             let tile_pos = tile_transform.translation.truncate();
-
             if !aabb_collision(player_pos, player_size, tile_pos, tile_size) {
                 continue;
             }
-
+            
             match tile.kind {
-                TileType::Ground | TileType::Wall => {
+                TileType::Ground | TileType::Wall | TileType::Platform => {
                     let delta = player_pos - tile_pos;
 
                     let combined_half = (player_size + tile_size) / 2.0;
@@ -66,11 +65,9 @@ pub fn player_with_tile_collision_system(
                     }
                     player_transform.translation.x = player_pos.x;
                     player_transform.translation.y = player_pos.y;
-
+                    
                 }
-                TileType::Platform => {
-                    // TODO
-                }
+                
             }
         }
     }

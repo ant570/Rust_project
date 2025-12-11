@@ -193,10 +193,10 @@ pub fn players_collsions(
         if intersects(&rect1, &rect2) {
             
             let details = claculate_collision(rect1, rect2);
-            if details[0] > 0.0{
+            if details[0] != 0.0{
                 //x collisions
                 let distance = details[0];
-                if distance >= 0.0{
+                if distance > 0.0{
                     data_vector.push((
                         entity_id1,
                         player1_component.collision_reaction_x * -1.0,
@@ -209,7 +209,7 @@ pub fn players_collsions(
                         0.0,
                     ));
                 }
-                else if distance > 0.0 {
+                else if distance < 0.0 {
                     let distance = details[1];
                     data_vector.push((
                         entity_id1,
@@ -227,7 +227,7 @@ pub fn players_collsions(
             else if details[1] > 0.0{
                 //y collisions
                 let distance = details[1];
-                if distance >= 0.0{
+                if distance > 0.0{
                     data_vector.push((
                         entity_id2,
                         0.0,
@@ -316,13 +316,5 @@ pub fn player_movement(
         player.pos.y += movement_y; //grawitacja
         transform.translation.y += movement_y;
         
-    }
-
-    pub fn collisions_with_platforms(
-        mut player_query: Query<(&mut Transform, &Collider), With<Player>>,
-        platform_query: Query<(&Transform, &Collider), With<PlatformMover>>,
-    )
-    {
-
     }
 }
