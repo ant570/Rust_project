@@ -5,7 +5,8 @@ use crate::player::spawn::Control::Wasd;
 use crate::player::spawn::Control::Arrows;
 use bevy::app::AppExit;
 use std::process;
- use crate::world::platforms::PlatformMover;
+use crate::world::platforms::PlatformMover;
+use std::ptr::null;
 
 const PLAYER_WIDTH: f32 = 200.0;
 const PLAYER_HEIGHT: f32 = 200.0;
@@ -20,6 +21,10 @@ pub struct Player{
     pub movement: bool,
     collision_reaction_x: f32,
     collision_reaction_y: f32,
+    pub jump: bool,
+    pub collision: Option<Entity>,
+    pub y_move: f32,
+    pub jump_height: f32,
 }
 
 
@@ -38,6 +43,9 @@ impl Player{
         movement: bool,
         collision_reaction_x: f32,
         collision_reaction_y: f32,
+        jump: bool,
+        jump_height: f32,
+
     ) -> Self 
     {
         Player{
@@ -49,8 +57,13 @@ impl Player{
             movement,
             collision_reaction_x,
             collision_reaction_y,
+            jump,
+            collision: Option::<Entity>::default(),
+            y_move: 0.0,
+            jump_height,
         }
     }
+
 }
 
 #[derive(Component)]
@@ -101,7 +114,7 @@ pub fn spawn_player(
             ..default()
         },
         Transform::from_xyz(x, y, 0.0),
-        Player::new(x, y, 200.0, 500.0, 5.0, control, movement, collision_reaction_x, collision_reaction_y),
+        Player::new(x, y, 500.0, 3000.0, 13.0, control, movement, collision_reaction_x, collision_reaction_y, false, 700.0),
         Collider{
             half_size: Vec2::new(PLAYER_HEIGHT / 2.0, PLAYER_WIDTH / 2.0),
         },
@@ -287,8 +300,9 @@ pub fn player_movement(
                 }
 
                 //Movement y
-                if keyboard_input.pressed(KeyCode::KeyW) {
-                    movement_y = time.delta_secs() * player.jump_speed;
+                if keyboard_input.just_pressed(KeyCode::KeyW) && player.jump {
+                    player.y_move += player.jump_height;
+                    player.jump = false;
                 }
             }
             Control::Arrows => {
@@ -303,11 +317,18 @@ pub fn player_movement(
                     movement_x = time.delta_secs() * -1.0;
                 }
 
+                
                 //Movement y
-                if keyboard_input.pressed(KeyCode::ArrowUp){
-                    movement_y = time.delta_secs() * player.jump_speed;
+                if keyboard_input.just_pressed(KeyCode::ArrowUp) && player.jump{
+                    println!("{}", player.jump_speed);
+                    player.y_move += player.jump_height;
+                    player.jump = false;
                 }
             }
+        }
+        if player.y_move > 0.0{
+            movement_y = f32::min(player.y_move, time.delta_secs() * player.jump_speed);
+            player.y_move -= movement_y;
         }
 
         player.pos.x += movement_x * player.speed_x;
