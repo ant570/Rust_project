@@ -20,6 +20,7 @@ pub struct Player{
     pub movement: bool,
     collision_reaction_x: f32,
     collision_reaction_y: f32,
+    jump: bool,
 }
 
 
@@ -38,6 +39,7 @@ impl Player{
         movement: bool,
         collision_reaction_x: f32,
         collision_reaction_y: f32,
+        jump: bool,
     ) -> Self 
     {
         Player{
@@ -49,6 +51,7 @@ impl Player{
             movement,
             collision_reaction_x,
             collision_reaction_y,
+            jump,
         }
     }
 }
@@ -101,7 +104,7 @@ pub fn spawn_player(
             ..default()
         },
         Transform::from_xyz(x, y, 0.0),
-        Player::new(x, y, 200.0, 500.0, 5.0, control, movement, collision_reaction_x, collision_reaction_y),
+        Player::new(x, y, 200.0, 500.0, 5.0, control, movement, collision_reaction_x, collision_reaction_y, false),
         Collider{
             half_size: Vec2::new(PLAYER_HEIGHT / 2.0, PLAYER_WIDTH / 2.0),
         },
