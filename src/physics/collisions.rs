@@ -1,6 +1,20 @@
 use bevy::prelude::*;
-use crate::player::spawn::Player;
+use crate::player::player::Player;
+use crate::player::spawn::Collider;
 use crate::world::spawn::{Tile, TileType};
+
+pub fn make_rect(
+    transform: &Transform,
+    collider: &Collider,
+) -> Rect {
+    Rect{
+        //left_bottom point
+        min: transform.translation.truncate() - collider.half_size,
+        //right_up point
+        max: transform.translation.truncate() + collider.half_size
+    }
+}
+
 
 pub fn aabb_collision(
     pos_a: Vec2,
@@ -44,6 +58,8 @@ pub fn player_with_tile_collision_system(
                     _player.collision = Option::<Entity>::default();
                 }
                 continue;
+
+
             }
             _player.collision = Some(tile_entity);
             _player.jump = true;
@@ -78,3 +94,116 @@ pub fn player_with_tile_collision_system(
         }
     }
 }
+
+fn intersects(a: &Rect, b: &Rect) -> bool {
+    a.min.x < b.max.x && a.max.x > b.min.x &&
+    a.min.y < b.max.y && a.max.y > b.min.y
+}
+
+pub fn claculate_collision(rect1: Rect, rect2: Rect) -> Vec2{
+    let center1 = (rect1.min + rect1.max) / 2.0;
+    let center2 = (rect2.min + rect2.max) / 2.0;
+
+    let size1= rect1.max - rect1.min;
+    let size2 = rect2.max - rect2.min;
+
+    let distance= center2 - center1;;
+    let max_distance = (size1 + size2) / 2.0;
+
+    let overlap_x = max_distance.x - distance.x.abs();
+    let overlap_y = max_distance.y - distance.y.abs();
+
+    if overlap_x <= 0.0 || overlap_y <= 0.0 {
+        return Vec2::new(0.0, 0.0); 
+    }
+    
+    if overlap_x < overlap_y {
+        // x collision
+        Vec2::new(distance.x, 0.0)
+    } else {
+        // y collision
+        Vec2::new(0.0, distance.y)
+    }
+}
+
+pub fn player_with_player(
+    mut query: Query<(Entity, &mut Transform, &Collider, &Player)>
+){
+    let mut data_vector: Vec<(Entity, f32, f32)> = Vec::new();
+    query.iter_combinations().for_each(|[player1, player2]| {
+        let (entity_id1, transform1, collider1, player1_component) = player1;
+        let (entity_id2, transform2, collider2, player2_component) = player2;
+        
+        let rect1 =  make_rect(transform1, collider1);
+        let rect2 = make_rect(transform2, collider2);
+
+        if intersects(&rect1, &rect2) {
+            
+            let details = claculate_collision(rect1, rect2);
+            if details[0] != 0.0{
+                //x collisions
+                let distance = details[0];
+                if distance > 0.0{
+                    data_vector.push((
+                        entity_id1,
+                        player1_component.collision_reaction_x * -1.0,
+                        0.0,
+                    ));
+
+                    data_vector.push((
+                        entity_id2,
+                        player1_component.collision_reaction_x,
+                        0.0,
+                    ));
+                }
+                else if distance < 0.0 {
+                    let distance = details[1];
+                    data_vector.push((
+                        entity_id1,
+                        player1_component.collision_reaction_x,
+                        0.0,
+                    ));
+
+                    data_vector.push((
+                        entity_id2,
+                        player1_component.collision_reaction_x * -1.0,
+                        0.0,
+                    ));
+                }
+            }
+            else if details[1] > 0.0{
+                //y collisions
+                let distance = details[1];
+                if distance > 0.0{
+                    data_vector.push((
+                        entity_id2,
+                        0.0,
+                        player1_component.collision_reaction_y,
+                    ));
+                }
+                else{
+                    data_vector.push((
+                        entity_id1,
+                        0.0,
+                        player1_component.collision_reaction_y,
+                    ));
+                }
+            }
+        }
+
+        
+
+    }
+    );
+    for (entity, x, y) in data_vector.iter_mut(){
+        match query.get_mut(*entity){
+            Ok((entity_pom, mut transform, collider, player_comp)) => {
+                // Zmień pozycję gracza
+                transform.translation.x += *x;
+                transform.translation.y += *y; 
+            }
+            _ => {}
+        }
+    }
+}
+

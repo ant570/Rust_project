@@ -4,9 +4,6 @@ use bevy::window::{MonitorSelection, WindowMode};
 mod world;
 mod player;
 mod physics;
-use crate::player::position::Position2;
-use crate::player::spawn::spawn_player;
-use crate::player::spawn::player_movement;
  
 fn main() {
     App::new()
