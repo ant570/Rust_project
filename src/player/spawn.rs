@@ -1,9 +1,9 @@
+
 use bevy::prelude::*;
 use crate::player::player::Control::Wasd;
 use crate::player::player::Control::Arrows;
 use crate::player::player::Control;
 use crate::player::player::Player;
-
 const PLAYER_WIDTH: f32 = 200.0;
 const PLAYER_HEIGHT: f32 = 200.0;
 #[derive(Component)]
@@ -59,8 +59,23 @@ pub fn spawn_player(
             half_size: Vec2::new(PLAYER_HEIGHT / 2.0, PLAYER_WIDTH / 2.0),
         },
     
-    ));
+    ))
+    .with_children(|parent| {
+        parent.spawn((
+            Text2d::new("0"),
+            TextFont{
+                font_size: 70.0,
+                ..default()
+            },
+            TextColor(Color::WHITE),
+            Transform::from_xyz(10.0, PLAYER_HEIGHT / 2.0 + 50.0, 0.0),
+            ScoreText,
+        ));
+    });
 
     
 }
+
+#[derive(Component)]
+pub struct ScoreText;
 

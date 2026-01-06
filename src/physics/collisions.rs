@@ -127,20 +127,25 @@ pub fn claculate_collision(rect1: Rect, rect2: Rect) -> Vec2{
 }
 
 pub fn player_with_player(
-    mut query: Query<(Entity, &mut Transform, &Collider, &Player)>
+    mut query: Query<(Entity, &mut Transform, &Collider, &mut Player)>
 ){
     let mut data_vector: Vec<(Entity, f32, f32)> = Vec::new();
-    query.iter_combinations().for_each(|[player1, player2]| {
-        let (entity_id1, transform1, collider1, player1_component) = player1;
-        let (entity_id2, transform2, collider2, _player2_component) = player2;
+    let mut combinations = query.iter_combinations_mut();
+    
+    // 2. Używamy pętli while, aby bezpiecznie pobierać kolejne pary
+    while let Some([player1, player2]) = combinations.fetch_next(){
+        let (entity_id1, transform1, collider1, mut player1_component) = player1;
+        let (entity_id2, transform2, collider2, mut player2_component) = player2;
         
-        let rect1 =  make_rect(transform1, collider1);
-        let rect2 = make_rect(transform2, collider2);
+        let rect1 =  make_rect(&transform1, collider1);
+        let rect2 = make_rect(&transform2, collider2);
 
         if intersects(&rect1, &rect2) {
-            
+            player1_component.points += 1;
+            player2_component.points += 2;
             let details = claculate_collision(rect1, rect2);
             if details[0] != 0.0{
+                
                 //x collisions
                 let distance = details[0];
                 if distance > 0.0{
@@ -193,7 +198,6 @@ pub fn player_with_player(
         
 
     }
-    );
     for (entity, x, y) in data_vector.iter_mut(){
         match query.get_mut(*entity){
             Ok((_entity_pom, mut transform, _collider, _player_comp)) => {
