@@ -1,7 +1,4 @@
 use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
-
-use crate::world::platforms::PlatformMover;
 use crate::world::utils::*;
 
 #[derive(Component)]
@@ -37,7 +34,7 @@ pub fn spawn_map(
 ) {
     let ground_texture: Handle<Image> = asset_server.load("tiles/stone.png");
     let wall_texture: Handle<Image> = asset_server.load("tiles/wall.png");
-    let platform_texture: Handle<Image> = asset_server.load("tiles/platform.png");
+    //let platform_texture: Handle<Image> = asset_server.load("tiles/platform.png");
 
     let tile_size = Vec2::new(TILE_SIZE, TILE_SIZE);
 

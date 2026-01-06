@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
 use crate::world::utils::WORLD_HEIGHT;
 use crate::world::utils::TILE_SIZE;
 
@@ -7,7 +6,7 @@ use crate::world::utils::TILE_SIZE;
 const PLATFORM_BASE_FALL_SPEED: f32 = 150.0;
 const DESPAWN_Y: f32 = -WORLD_HEIGHT / 2.0 + TILE_SIZE  * 1.5;
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy)]
 pub struct PlatformMover {
     pub origin: Vec3,
     pub horizontal: bool,

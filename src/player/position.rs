@@ -12,7 +12,7 @@ impl Position2{
         }
     }
 
-    pub fn to_str(&self) {
+    pub fn _to_str(&self) {
         println!("{{ x: {}, y: {} }}", self.x, self.y);
     }
 }

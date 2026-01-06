@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use rand::Rng;
-use crate::player::spawn::Collider;
 use crate::world::spawn::TileType;
 use crate::world::platforms::PlatformMover;
 use crate::world::utils::*;
@@ -27,6 +26,7 @@ pub fn platform_spawner_system(
     windows: Query<&Window, With<PrimaryWindow>>,
     cameras: Query<&Transform, With<Camera2d>>,
     images: Res<Assets<Image>>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     if !timer.0.tick(time.delta()).just_finished() {
         return;
@@ -35,15 +35,15 @@ pub fn platform_spawner_system(
     let Ok(window) = windows.single() else { return; };
     let Ok(cam_transform) = cameras.single() else { return; };
 
-    let cam_y = cam_transform.translation.y;
-    let top_screen_y = cam_y + window.height() / 2.0;
+    //let cam_y = cam_transform.translation.y;
+    //let top_screen_y = cam_y + window.height() / 2.0;
 
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     let left = cam_transform.translation.x - window.width() / 2.0;
     let right = cam_transform.translation.x + window.width() / 2.0;
 
-    let x = rng.gen_range(left..right);
+    let x = rng.random_range(left..right);
     let y = WORLD_HEIGHT/2.0;
 
     let origin = Vec3::new(x, y, 0.0);
@@ -55,32 +55,54 @@ pub fn platform_spawner_system(
         
     }
     
-    let decide = rng.gen_bool(0.7); // 70% szans na ruchomą platformę
+    let decide = rng.random_bool(0.7); // 70% szans na ruchomą platformę
     let fall_factor = 0.5;
     
+    let coin = rng.random_bool(0.3); // 30% szans na monetę na platformie
+    
     if decide {
-        let amplitude = rng.gen_range(50.0..120.0); 
-        let speed = rng.gen_range(1.0..4.0); 
+        let amplitude = rng.random_range(50.0..120.0); 
+        let speed = rng.random_range(1.0..4.0); 
                
+        let mover = PlatformMover::horizontal(origin, amplitude, speed, fall_factor);
         commands.spawn((
             Sprite::from_image(texture),
             Transform::from_translation(origin),
-            PlatformMover::horizontal(origin, amplitude, speed, fall_factor),
+            mover,
             Tile{
                 size: platform_size,
                 kind: TileType::Platform,
             }
         ));
+        if coin {
+        crate::world::coin::spawn_coin_on_platform(
+            &mut commands,
+            &asset_server,
+            &mut texture_atlas_layouts,
+            Vec3::new(x, y + 60.0, 1.0),
+            mover.clone(),
+        );
+    }  
     } else {
-
+        let mover = PlatformMover::falling_only(origin, fall_factor);
         commands.spawn((
             Sprite::from_image(texture),
             Transform::from_translation(origin),
-            PlatformMover::falling_only(origin, fall_factor),
+            mover,
             Tile{
                 size: platform_size,
                 kind: TileType::Platform,
             }
+            
         ));
+        if coin {
+            crate::world::coin::spawn_coin_on_platform(
+                &mut commands,
+                &asset_server,
+                &mut texture_atlas_layouts,
+                Vec3::new(x, y + 60.0, 1.0),
+                mover.clone(),
+            );
+        }  
     }
 }
