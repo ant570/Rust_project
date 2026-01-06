@@ -15,7 +15,6 @@ impl Plugin for PlatformerGamePlugin {
             //.add_systems(Startup, spawn::spawn_initial_platforms);
             .add_systems(Startup, platforms_spawner::setup_platform_spawner)
             .add_systems(Update, platforms_spawner::platform_spawner_system)
-            .add_systems(Startup, coin::spawn_initial_coins)
-            .add_systems(Update, coin::animate_coin);
+            .add_systems(Update, coin::animate_coins);
     }
 }

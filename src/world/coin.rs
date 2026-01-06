@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::world::platforms::PlatformMover;
+
 #[derive(Component)]
 pub struct AnimationConfig {
     pub frame_timer: Timer,
@@ -14,17 +16,20 @@ impl AnimationConfig {
         }
     }
 }
-pub fn spawn_initial_coins(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+
+pub fn spawn_coin_on_platform(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
+    position: Vec3,
+    mover: PlatformMover,
 ) {
     let columns= 5;
     let rows = 2;
-    let frame_size = Vec2::new(200.0, 200.0);
+    let frame_size = UVec2::new(200, 200);
 
     let layout = TextureAtlasLayout::from_grid(
-        UVec2::new(200, 200),
+        frame_size,
         columns, 
         rows,
         None,
@@ -33,7 +38,6 @@ pub fn spawn_initial_coins(
 
     let texture_handle = asset_server.load("others/coin.png");
     let layout_handle = texture_atlas_layouts.add(layout);
-    println!("Spawning initial coins");
     commands.spawn((
         Sprite {
             image: texture_handle,
@@ -43,12 +47,13 @@ pub fn spawn_initial_coins(
             }),
             ..default()
         },
-        Transform::from_xyz(100.0, 100.0, 1.0),
+        Transform::from_xyz(position.x, position.y, position.z).with_scale(Vec3::splat(0.4)),
         AnimationConfig::new(0.1, 10),
+        mover,
     ));
 }
 
-pub fn animate_coin(
+pub fn animate_coins(
     time: Res<Time>,
     mut query: Query<(&mut AnimationConfig, &mut Sprite)>,
 ) {
