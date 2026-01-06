@@ -175,7 +175,7 @@ pub fn player_with_player(
                     ));
                 }
             }
-            else if details[1] > 0.0{
+            else if details[1] != 0.0{
                 //y collisions
                 let distance = details[1];
                 if distance > 0.0{
