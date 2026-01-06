@@ -141,11 +141,11 @@ pub fn player_with_player(
         let rect2 = make_rect(&transform2, collider2);
 
         if intersects(&rect1, &rect2) {
-            player1_component.points += 1;
-            player2_component.points += 2;
+            
             let details = claculate_collision(rect1, rect2);
             if details[0] != 0.0{
-                
+                player1_component.points += 1;
+                player2_component.points += 1;
                 //x collisions
                 let distance = details[0];
                 if distance > 0.0{
@@ -182,8 +182,26 @@ pub fn player_with_player(
                     data_vector.push((
                         entity_id2,
                         0.0,
-                        player1_component.collision_reaction_y,
+                        player2_component.collision_reaction_y,
                     ));
+
+                    player1_component.y_move = 0.0;
+                    if player1_component.jump{
+                        player2_component.points += 5;
+                    }
+                    else if player2_component.jump{
+                        player1_component.points += 5;
+                    }
+                    else{
+                        player2_component.points += 5;
+                    }
+
+                    //ToDo
+                    // data_vector.push((
+                    //     entity_id1,
+                    //     0.0,
+                    //     player1_component.collision_reaction_y * -1.0,
+                    // ));
                 }
                 else{
                     data_vector.push((
@@ -191,6 +209,25 @@ pub fn player_with_player(
                         0.0,
                         player1_component.collision_reaction_y,
                     ));
+
+                    player2_component.y_move = 0.0;
+
+                    if player2_component.jump{
+                        player1_component.points += 5;
+                    }
+                    else if player1_component.jump{
+                        player2_component.points += 5;
+                    }
+                    else{
+                        player1_component.points += 5;
+                    }
+                    
+                    //ToDo
+                    // data_vector.push((
+                    //     entity_id2,
+                    //     0.0,
+                    //     player2_component.collision_reaction_y  /2.0 * -1.0,
+                    // ));
                 }
             }
         }
