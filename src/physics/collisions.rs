@@ -49,7 +49,7 @@ pub fn player_with_tile_collision_system(
         let mut player_pos = player_transform.translation.truncate();   // bez pozycji z osi z
         let player_size = player_sprite.custom_size.unwrap_or(Vec2::ZERO);
 
-        for (tile_entity, tile_transform, tile_sprite, tile) in &tile_query {
+        for (tile_entity, tile_transform, _tile_sprite, tile) in &tile_query {
             let tile_size = tile.size;
             let tile_pos = tile_transform.translation.truncate();
             if !aabb_collision(player_pos, player_size, tile_pos, tile_size) {
@@ -107,7 +107,7 @@ pub fn claculate_collision(rect1: Rect, rect2: Rect) -> Vec2{
     let size1= rect1.max - rect1.min;
     let size2 = rect2.max - rect2.min;
 
-    let distance= center2 - center1;;
+    let distance= center2 - center1;
     let max_distance = (size1 + size2) / 2.0;
 
     let overlap_x = max_distance.x - distance.x.abs();
@@ -132,7 +132,7 @@ pub fn player_with_player(
     let mut data_vector: Vec<(Entity, f32, f32)> = Vec::new();
     query.iter_combinations().for_each(|[player1, player2]| {
         let (entity_id1, transform1, collider1, player1_component) = player1;
-        let (entity_id2, transform2, collider2, player2_component) = player2;
+        let (entity_id2, transform2, collider2, _player2_component) = player2;
         
         let rect1 =  make_rect(transform1, collider1);
         let rect2 = make_rect(transform2, collider2);
@@ -157,7 +157,6 @@ pub fn player_with_player(
                     ));
                 }
                 else if distance < 0.0 {
-                    let distance = details[1];
                     data_vector.push((
                         entity_id1,
                         player1_component.collision_reaction_x,
@@ -197,7 +196,7 @@ pub fn player_with_player(
     );
     for (entity, x, y) in data_vector.iter_mut(){
         match query.get_mut(*entity){
-            Ok((entity_pom, mut transform, collider, player_comp)) => {
+            Ok((_entity_pom, mut transform, _collider, _player_comp)) => {
                 // Zmień pozycję gracza
                 transform.translation.x += *x;
                 transform.translation.y += *y; 

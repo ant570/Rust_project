@@ -47,7 +47,7 @@ pub fn spawn_player(
     collision_reaction_y: f32,
 ) {
     let player_size = Vec2::new(PLAYER_HEIGHT, PLAYER_HEIGHT);
-    let mut entity = commands.spawn((
+    let mut _entity = commands.spawn((
         Sprite{
             custom_size: Some(player_size),
             image: player_texture,

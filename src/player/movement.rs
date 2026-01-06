@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use crate::player::player::Player;
 use std::process;
-use bevy::app::AppExit;
 use bevy::input::ButtonInput;
 use bevy::time::Time;
 use crate::player::player::Control;
@@ -11,7 +10,6 @@ pub fn keyboard_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut Transform, &mut Player)>,
     time: Res<Time>,
-    mut app_exit_events: MessageWriter<AppExit>,
 ){
     //Zakończenie gry 
     if keyboard_input.just_pressed(KeyCode::Escape){
@@ -19,7 +17,7 @@ pub fn keyboard_input(
     }
     else if keyboard_input.just_pressed(KeyCode::Space) {
         //Zapauzowanie gry
-        for (mut transform, mut player) in query.iter_mut(){
+        for (_transform, mut player) in query.iter_mut(){
             if player.movement == true {
                 player.movement = false;
             }

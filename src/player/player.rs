@@ -20,6 +20,7 @@ pub struct Player{
     pub collision: Option<Entity>,
     pub y_move: f32,
     pub jump_height: f32,
+    pub points: u32,
 }
 
 
@@ -51,6 +52,7 @@ impl Player{
             collision: Option::<Entity>::default(),
             y_move: 0.0,
             jump_height,
+            points: 0,
         }
     }
 
