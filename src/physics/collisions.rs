@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use crate::player::player::Player;
 use crate::player::spawn::Collider;
 use crate::world::spawn::{Tile, TileType};
-
+use crate::world::coin::Coin
+;
 pub fn make_rect(
     transform: &Transform,
     collider: &Collider,
@@ -243,6 +244,28 @@ pub fn player_with_player(
                 transform.translation.y += *y; 
             }
             _ => {}
+        }
+    }
+}
+
+pub fn player_with_coin_collision_system(
+    mut commands: Commands,
+    mut player_query: Query<(&Transform, &mut Player, &Sprite)>,
+    coin_query: Query<(Entity, &Transform, &Sprite, &Coin)>,
+) {
+    for (player_transform, mut player, player_sprite) in &mut player_query {
+        let player_pos = player_transform.translation.truncate();
+        let player_size = player_sprite.custom_size.unwrap_or(Vec2::ZERO);
+
+        for (coin_entity, coin_transform, coin_sprite, _coin) in &coin_query {
+            let coin_size = coin_sprite.custom_size.unwrap_or(Vec2::ZERO);
+            let coin_pos = coin_transform.translation.truncate();
+            if aabb_collision(player_pos, player_size, coin_pos, coin_size) {
+                player.points += 25; // Dodawanie punktów
+                commands.entity(coin_entity).despawn(); // usuwanie monety
+            }
+            else {
+            }
         }
     }
 }

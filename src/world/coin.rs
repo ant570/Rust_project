@@ -7,6 +7,9 @@ pub struct AnimationConfig {
     pub frame_timer: Timer,
     pub total_frames: usize,
 }
+#[derive(Component)]
+pub struct Coin;
+
 
 impl AnimationConfig {
     pub fn new(frame_duration_secs: f32, total_frames: usize) -> Self {
@@ -45,11 +48,13 @@ pub fn spawn_coin_on_platform(
                 layout: layout_handle,
                 index: 0,
             }),
+            custom_size: Some(Vec2::new(70.0, 70.0)),
             ..default()
         },
-        Transform::from_xyz(position.x, position.y, position.z).with_scale(Vec3::splat(0.4)),
+        Transform::from_xyz(position.x, position.y, position.z),
         AnimationConfig::new(0.1, 10),
         mover,
+        Coin,
     ));
 }
 

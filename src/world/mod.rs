@@ -5,7 +5,7 @@ pub mod spawn;
 pub mod platforms;
 mod platforms_spawner;
 mod utils;
-mod coin;
+pub mod coin;
 
 impl Plugin for PlatformerGamePlugin {
     fn build(&self, app: &mut App) {
