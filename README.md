@@ -28,7 +28,7 @@ Iteracja 2:
 
     [ ] W miarę możliwości: dodanie botów przeszkadzających.
 
-    [ ] Licznik punktów.
+    [x] Licznik punktów.
 
     [ ] Dodanie nowych animacji.
 
