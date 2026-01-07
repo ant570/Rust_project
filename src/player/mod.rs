@@ -11,6 +11,7 @@ impl Plugin for PlatformerGamePlugin {
         app
             .add_systems(Startup, spawn::spawn_players)
             .add_systems(Update, movement::keyboard_input)
+            .add_systems(Update, spawn::check_player_fall)
             .add_systems(Update, score::update_score_text);
     }
 }

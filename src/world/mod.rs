@@ -4,7 +4,7 @@ pub struct PlatformerGamePlugin;
 pub mod spawn;
 pub mod platforms;
 mod platforms_spawner;
-mod utils;
+pub mod utils;
 pub mod coin;
 
 impl Plugin for PlatformerGamePlugin {

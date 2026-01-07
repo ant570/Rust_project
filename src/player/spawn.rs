@@ -79,3 +79,45 @@ pub fn spawn_player(
 #[derive(Component)]
 pub struct ScoreText;
 
+
+pub fn check_player_fall(
+    mut query: Query<(Entity, &mut Transform, &mut Player)>,
+) {
+    let mut fallen_entities = Vec::new();
+    let fall_limit = -crate::world::utils::WORLD_HEIGHT / 2.0 - 200.0; 
+
+    for (entity, transform, _) in query.iter() {
+        if transform.translation.y < fall_limit {
+            fallen_entities.push(entity);
+        }
+    }
+
+    if fallen_entities.is_empty() {
+        return;
+    }
+
+    for (entity, mut transform, mut player) in query.iter_mut() {
+        if fallen_entities.contains(&entity) {
+            
+            transform.translation.y = 200.0;
+            transform.translation.x = 0.0; 
+            
+            let respawn_x = match player.control {
+                Control::Arrows => 200.0,
+                Control::Wasd => -200.0,
+            };
+            transform.translation.x = respawn_x;
+
+            player.pos.x = respawn_x;
+            player.pos.y = 200.0;
+            player.y_move = 0.0;
+
+            player.jump = false;
+            player.y_move = 0.0;
+
+        } else {
+            player.points += 500;
+        }
+    }
+}
+
