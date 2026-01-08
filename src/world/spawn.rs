@@ -9,6 +9,7 @@ pub struct Tile {
 }
 
 
+#[derive(PartialEq, Eq)]
 pub enum TileType {
     Ground,
     Platform,
