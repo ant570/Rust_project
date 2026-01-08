@@ -2,8 +2,9 @@ use bevy::prelude::*;
 use crate::player::player::Player;
 use crate::player::spawn::Collider;
 use crate::world::spawn::{Tile, TileType};
-use crate::world::coin::Coin
-;
+use crate::world::coin::Coin;
+
+pub const MAX_COLLISION_PUSH: f32 = 30.0;
 pub fn make_rect(
     transform: &Transform,
     collider: &Collider,
@@ -46,7 +47,7 @@ pub fn player_with_tile_collision_system(
     mut player_query: Query<(&mut Transform, &Sprite, &mut Player)>,
     tile_query: Query<(Entity, &Transform, &Sprite, &Tile), Without<Player>>,
 ) {
-    for (mut player_transform, player_sprite, mut _player) in &mut player_query {
+    for (mut player_transform, player_sprite, mut player) in &mut player_query {
         let mut player_pos = player_transform.translation.truncate();   // bez pozycji z osi z
         let player_size = player_sprite.custom_size.unwrap_or(Vec2::ZERO);
 
@@ -54,27 +55,30 @@ pub fn player_with_tile_collision_system(
             let tile_size = tile.size;
             let tile_pos = tile_transform.translation.truncate();
             if !aabb_collision(player_pos, player_size, tile_pos, tile_size) {
-                if _player.collision == Some(tile_entity){
-                    _player.jump = false;
-                    _player.collision = Option::<Entity>::default();
+                if player.collision == Some(tile_entity){
+                    player.jump = false;
+                    player.collision = Option::<Entity>::default();
                 }
                 continue;
 
 
             }
-            _player.collision = Some(tile_entity);
-            _player.jump = true;
+            player.collision = Some(tile_entity);
+            player.jump = true;
             
             match tile.kind {
                 TileType::Ground | TileType::Wall | TileType::Platform => {
                     let delta = player_pos - tile_pos;
 
                     let combined_half = (player_size + tile_size) / 2.0;
-                    let overlap_x = combined_half.x - delta.x.abs();
-                    let overlap_y = combined_half.y - delta.y.abs();  // sprawdzenie nakladania sie
-
+                    let mut overlap_x = combined_half.x - delta.x.abs();
+                    let mut overlap_y = combined_half.y - delta.y.abs();  // sprawdzenie nakladania sie
+                    overlap_x = overlap_x.max(-MAX_COLLISION_PUSH);
+                    overlap_y = overlap_y.max(-MAX_COLLISION_PUSH);
+                    overlap_x = overlap_x.min(MAX_COLLISION_PUSH); 
+                    overlap_y = overlap_y.min(MAX_COLLISION_PUSH);
                     if overlap_x < overlap_y {
-                        if delta.x > 0.0 {
+                        if delta.x > 0.0{
                             player_pos.x += overlap_x;
                         } else {
                             player_pos.x -= overlap_x;
@@ -83,6 +87,7 @@ pub fn player_with_tile_collision_system(
                         if delta.y > 0.0 {
                             player_pos.y += overlap_y;
                         } else {
+                            player.y_move = 0.0;
                             player_pos.y -= overlap_y;
                         }
                     }

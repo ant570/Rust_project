@@ -4,8 +4,8 @@ use crate::player::player::Control::Wasd;
 use crate::player::player::Control::Arrows;
 use crate::player::player::Control;
 use crate::player::player::Player;
-const PLAYER_WIDTH: f32 = 200.0;
-const PLAYER_HEIGHT: f32 = 200.0;
+const PLAYER_WIDTH: f32 = 150.0;
+const PLAYER_HEIGHT: f32 = 150.0;
 #[derive(Component)]
 pub struct Collider{
     pub half_size: Vec2,
