@@ -14,13 +14,13 @@ Iteracja 1: Fundamenty i Prototyp Gry
 
     [x] Zaimplementowanie kolizji między graczami.
 
-    [ ] Prosty reset po spadnięciu poza mapę. (w tej chwili nie da się spaść poza obszar mapy, więc implementacja tego nie ma sensu)
+    [X] Prosty reset po spadnięciu poza mapę. (w tej chwili nie da się spaść poza obszar mapy, więc implementacja tego nie ma sensu)
 
     [x] Uproszczona lub prymitywna grafika.
 
 Iteracja 2:
 
-    [ ] Efekty dźwiękowe.
+    [x] Efekty dźwiękowe.
 
     [ ] Menu startowe/ ekran końca gry/ proste ustawienia.
 
