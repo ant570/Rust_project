@@ -4,6 +4,7 @@ use crate::player::player::Control::Wasd;
 use crate::player::player::Control::Arrows;
 use crate::player::player::Control;
 use crate::player::player::Player;
+use crate::audio::GameAudio;
 const PLAYER_WIDTH: f32 = 150.0;
 const PLAYER_HEIGHT: f32 = 150.0;
 #[derive(Component)]
@@ -81,13 +82,17 @@ pub struct ScoreText;
 
 
 pub fn check_player_fall(
+    mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &mut Player)>,
+    audio_assets: Res<GameAudio>
 ) {
     let mut fallen_entities = Vec::new();
     let fall_limit = -crate::world::utils::WORLD_HEIGHT / 2.0 - 200.0; 
 
     for (entity, transform, _) in query.iter() {
-        if transform.translation.y < fall_limit {
+        if transform.translation.y < fall_limit 
+        {
+            commands.spawn(AudioPlayer::new(audio_assets.lose.clone()));
             fallen_entities.push(entity);
         }
     }

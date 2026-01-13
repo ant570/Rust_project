@@ -4,12 +4,14 @@ use std::process;
 use bevy::input::ButtonInput;
 use bevy::time::Time;
 use crate::player::player::Control;
-
+use crate::audio::GameAudio;
 
 pub fn keyboard_input(
+    commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut Transform, &mut Player)>,
     time: Res<Time>,
+    audio_assets: Res<GameAudio>
 ){
     //Zakończenie gry 
     if keyboard_input.just_pressed(KeyCode::Escape){
@@ -28,14 +30,17 @@ pub fn keyboard_input(
     }
     else{
         //Ruch gracza
-        player_movement(keyboard_input, query, time);
+        player_movement(commands, keyboard_input, query, time, audio_assets);
     }
 }
 
 pub fn player_movement(
+    mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut Transform, &mut Player)>,
     time: Res<Time>,
+    audio_assets: Res<GameAudio>
+
 ) {
     for (mut transform, mut player) in query.iter_mut(){
 
@@ -60,6 +65,7 @@ pub fn player_movement(
 
                 //Movement y
                 if keyboard_input.just_pressed(KeyCode::KeyW) && player.jump {
+                    commands.spawn(AudioPlayer::new(audio_assets.jump.clone()));
                     player.y_move += player.jump_height;
                     player.jump = false;
                 }
@@ -79,6 +85,7 @@ pub fn player_movement(
                 
                 //Movement y
                 if keyboard_input.just_pressed(KeyCode::ArrowUp) && player.jump{
+                    commands.spawn(AudioPlayer::new(audio_assets.jump.clone()));
                     println!("{}", player.jump_speed);
                     player.y_move += player.jump_height;
                     player.jump = false;
