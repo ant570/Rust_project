@@ -3,8 +3,10 @@ use crate::player::player::Player;
 use crate::player::spawn::Collider;
 use crate::world::spawn::{Tile, TileType};
 use crate::world::coin::Coin;
+use crate::audio::{GameAudio};
 
 pub const MAX_COLLISION_PUSH: f32 = 30.0;
+
 pub fn make_rect(
     transform: &Transform,
     collider: &Collider,
@@ -133,7 +135,9 @@ pub fn claculate_collision(rect1: Rect, rect2: Rect) -> Vec2{
 }
 
 pub fn player_with_player(
-    mut query: Query<(Entity, &mut Transform, &Collider, &mut Player)>
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut Transform, &Collider, &mut Player)>,
+    audio_assets: Res<GameAudio>
 ){
     let mut data_vector: Vec<(Entity, f32, f32)> = Vec::new();
     let mut combinations = query.iter_combinations_mut();
@@ -150,6 +154,7 @@ pub fn player_with_player(
             
             let details = claculate_collision(rect1, rect2);
             if details[0] != 0.0{
+                commands.spawn(AudioPlayer::new(audio_assets.fight.clone()));
                 player1_component.points += 1;
                 player2_component.points += 1;
                 //x collisions
@@ -182,6 +187,7 @@ pub fn player_with_player(
                 }
             }
             else if details[1] != 0.0{
+                commands.spawn(AudioPlayer::new(audio_assets.damage.clone()));
                 //y collisions
                 let distance = details[1];
                 if distance > 0.0{
@@ -210,6 +216,7 @@ pub fn player_with_player(
                     // ));
                 }
                 else{
+                    commands.spawn(AudioPlayer::new(audio_assets.damage.clone()));
                     data_vector.push((
                         entity_id1,
                         0.0,
@@ -257,6 +264,7 @@ pub fn player_with_coin_collision_system(
     mut commands: Commands,
     mut player_query: Query<(&Transform, &mut Player, &Sprite)>,
     coin_query: Query<(Entity, &Transform, &Sprite, &Coin)>,
+    audio_assets: Res<GameAudio>,
 ) {
     for (player_transform, mut player, player_sprite) in &mut player_query {
         let player_pos = player_transform.translation.truncate();
@@ -266,6 +274,7 @@ pub fn player_with_coin_collision_system(
             let coin_size = coin_sprite.custom_size.unwrap_or(Vec2::ZERO);
             let coin_pos = coin_transform.translation.truncate();
             if aabb_collision(player_pos, player_size, coin_pos, coin_size) {
+                commands.spawn(AudioPlayer::new(audio_assets.coin_pickup.clone()));
                 player.points += 25; // Dodawanie punktów
                 commands.entity(coin_entity).despawn(); // usuwanie monety
             }
