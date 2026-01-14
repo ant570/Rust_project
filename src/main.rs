@@ -1,12 +1,12 @@
+use bevy::audio::AudioPlugin;
 use bevy::prelude::*;
 use bevy::window::{MonitorSelection, WindowMode};
-use bevy::audio:: AudioPlugin;
 
-mod world;
-mod player;
-mod physics;
 mod audio;
- 
+mod physics;
+mod player;
+mod world;
+
 fn main() {
     App::new()
         .add_plugins(
@@ -19,9 +19,7 @@ fn main() {
                     }),
                     ..default()
                 })
-                .set(AudioPlugin {
-                    ..default()
-                })
+                .set(AudioPlugin { ..default() }),
         )
         .add_plugins(crate::world::PlatformerGamePlugin)
         .add_plugins(crate::player::PlatformerGamePlugin)

@@ -1,13 +1,12 @@
-use bevy::prelude::*;
 use crate::world::utils::*;
-use rand::Rng; 
+use bevy::prelude::*;
+use rand::Rng;
 
 #[derive(Component)]
 pub struct Tile {
     pub size: Vec2,
     pub kind: TileType,
 }
-
 
 #[derive(PartialEq, Eq)]
 pub enum TileType {
@@ -24,16 +23,10 @@ pub fn spawn_camera(mut commands: Commands) {
         ..OrthographicProjection::default_2d()
     });
 
-    commands.spawn((
-        Camera2d,
-        projection,
-    ));
+    commands.spawn((Camera2d, projection));
 }
 
-pub fn spawn_map(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
+pub fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>) {
     let ground_texture: Handle<Image> = asset_server.load("tiles/stone.png");
     let wall_texture: Handle<Image> = asset_server.load("tiles/wall.png");
 
@@ -46,25 +39,29 @@ pub fn spawn_map(
     let start_y = -grid_height / 2.0 + TILE_SIZE / 2.0;
 
     let mut rng = rand::rng();
-    
+
     // 3 holes on the bottom
     let mut bottom_presence = vec![true; GRID_COLS as usize];
-    
 
     for _ in 0..3 {
-        let hole_width = rng.random_range(5..8); 
+        let hole_width = rng.random_range(5..8);
         for _attempt in 0..10 {
             let start = rng.random_range(5..(GRID_COLS as usize - hole_width - 5));
             let end = start + hole_width;
-            
+
             let mut overlapping_hole = false;
             for k in start..end {
-                 if !bottom_presence[k] { overlapping_hole = true; break;}
+                if !bottom_presence[k] {
+                    overlapping_hole = true;
+                    break;
+                }
             }
 
             if !overlapping_hole {
-                 for k in start..end { bottom_presence[k] = false; }
-                 break;
+                for k in start..end {
+                    bottom_presence[k] = false;
+                }
+                break;
             }
         }
     }
@@ -75,7 +72,7 @@ pub fn spawn_map(
         col_end: i32,
     }
     let mut shelves = Vec::new();
-    
+
     let left_rows = [10, 20, 26];
     for r in left_rows {
         let length = rng.random_range(6..20);
@@ -114,18 +111,14 @@ pub fn spawn_map(
 
             if col == 0 || col == GRID_COLS - 1 {
                 spawn_type = Some(TileType::Wall);
-            } 
-
-            else if row == 0 {
+            } else if row == 0 {
                 if bottom_presence[col as usize] {
                     spawn_type = Some(TileType::Ground);
                 }
-            } 
-
-            else {
+            } else {
                 for shelf in &shelves {
                     if row == shelf.row && col >= shelf.col_start && col < shelf.col_end {
-                        spawn_type = Some(TileType::Ground); 
+                        spawn_type = Some(TileType::Ground);
                         break;
                     }
                 }
@@ -138,7 +131,7 @@ pub fn spawn_map(
                     TileType::Platform => panic!("Should not happen here"),
                 };
 
-                 entity.insert((
+                entity.insert((
                     Sprite {
                         image: texture,
                         custom_size: Some(tile_size),

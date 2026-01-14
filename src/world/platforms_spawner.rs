@@ -1,10 +1,10 @@
+use crate::world::platforms::PlatformMover;
+use crate::world::spawn::Tile;
+use crate::world::spawn::TileType;
+use crate::world::utils::*;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use rand::Rng;
-use crate::world::spawn::TileType;
-use crate::world::platforms::PlatformMover;
-use crate::world::utils::*;
-use crate::world::spawn::Tile;
 
 const PLATFORM_SPAWN_INTERVAL: f32 = 3.0;
 
@@ -32,8 +32,12 @@ pub fn platform_spawner_system(
         return;
     }
 
-    let Ok(window) = windows.single() else { return; };
-    let Ok(cam_transform) = cameras.single() else { return; };
+    let Ok(window) = windows.single() else {
+        return;
+    };
+    let Ok(cam_transform) = cameras.single() else {
+        return;
+    };
 
     //let cam_y = cam_transform.translation.y;
     //let top_screen_y = cam_y + window.height() / 2.0;
@@ -44,24 +48,26 @@ pub fn platform_spawner_system(
     let right = cam_transform.translation.x + window.width() / 2.0;
 
     let x = rng.random_range(left..right);
-    let y = WORLD_HEIGHT/2.0;
+    let y = WORLD_HEIGHT / 2.0;
 
     let origin = Vec3::new(x, y, 0.0);
 
     let texture = asset_server.load("tiles/platform.png");
     let mut platform_size = Vec2::new(0.0, 0.0);
-    if let Some(image) = images.get(&texture){
+    if let Some(image) = images.get(&texture) {
         platform_size = Vec2::new(image.width() as f32, image.height() as f32);
-        
     }
-    
+
     let decide = rng.random_bool(0.7); // 70% szans na ruchomą platformę
     let fall_factor = 0.5;
-    
+
     let scale_x = rng.random_range(1.0..2.5);
-    
+
     if platform_size == Vec2::ZERO {
-        platform_size = Vec2::new(crate::world::utils::TILE_SIZE, crate::world::utils::TILE_SIZE * 0.5);
+        platform_size = Vec2::new(
+            crate::world::utils::TILE_SIZE,
+            crate::world::utils::TILE_SIZE * 0.5,
+        );
     }
     platform_size.x *= scale_x;
 
@@ -69,41 +75,45 @@ pub fn platform_spawner_system(
     sprite.custom_size = Some(platform_size);
 
     let coin = rng.random_bool(0.3); // 30% szans na monetę na platformie
-    
+
     if decide {
-        let amplitude = rng.random_range(50.0..120.0); 
-        let speed = rng.random_range(1.0..4.0); 
-               
+        let amplitude = rng.random_range(50.0..120.0);
+        let speed = rng.random_range(1.0..4.0);
+
         let mover = PlatformMover::horizontal(origin, amplitude, speed, fall_factor);
         commands.spawn((
             sprite,
             Transform::from_translation(origin),
             mover,
-            Tile{
+            Tile {
                 size: platform_size,
                 kind: TileType::Platform,
-            }
+            },
         ));
         if coin {
-        crate::world::coin::spawn_coin_on_platform(
-            &mut commands,
-            &asset_server,
-            &mut texture_atlas_layouts,
-            Vec3::new(x, y + 60.0, 1.0),
-            crate::world::platforms::PlatformMover::horizontal(origin, amplitude, speed, fall_factor), 
-        );
-    }  
+            crate::world::coin::spawn_coin_on_platform(
+                &mut commands,
+                &asset_server,
+                &mut texture_atlas_layouts,
+                Vec3::new(x, y + 60.0, 1.0),
+                crate::world::platforms::PlatformMover::horizontal(
+                    origin,
+                    amplitude,
+                    speed,
+                    fall_factor,
+                ),
+            );
+        }
     } else {
         let mover = PlatformMover::falling_only(origin, fall_factor);
         commands.spawn((
             sprite,
             Transform::from_translation(origin),
             mover,
-            Tile{
+            Tile {
                 size: platform_size,
                 kind: TileType::Platform,
-            }
-            
+            },
         ));
         if coin {
             crate::world::coin::spawn_coin_on_platform(
@@ -113,6 +123,6 @@ pub fn platform_spawner_system(
                 Vec3::new(x, y + 60.0, 1.0),
                 crate::world::platforms::PlatformMover::falling_only(origin, fall_factor),
             );
-        }  
+        }
     }
 }

@@ -33,3 +33,17 @@ Iteracja 2:
     [ ] Dodanie nowych animacji.
 
     [ ] Poprawa grafiki.
+
+
+Mechanika gry:
+    Gracz 1: 
+    Kierowanie: WSAD
+    Atak: F
+
+    Gracz 2:
+    Kierowanie: Strzałki
+    Atak: .
+
+    
+
+    

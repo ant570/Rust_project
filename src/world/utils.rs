@@ -5,4 +5,3 @@ pub const GRID_ROWS: i32 = 40;
 
 pub const WORLD_WIDTH: f32 = GRID_COLS as f32 * TILE_SIZE;
 pub const WORLD_HEIGHT: f32 = GRID_ROWS as f32 * TILE_SIZE;
-

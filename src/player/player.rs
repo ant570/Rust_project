@@ -1,13 +1,13 @@
-use bevy::prelude::*;
 use crate::player::position::Position2;
+use bevy::prelude::*;
 
-pub enum Control{
+pub enum Control {
     Wasd,
-    Arrows
+    Arrows,
 }
 
 #[derive(Component)]
-pub struct Player{
+pub struct Player {
     pub pos: Position2,
     pub speed_x: f32,
     pub jump_speed: f32,
@@ -23,24 +23,22 @@ pub struct Player{
     pub points: u32,
 }
 
-
-impl Player{
-    pub fn new(x: f32,
-        y: f32, 
-        speed_x: f32, 
+impl Player {
+    pub fn new(
+        x: f32,
+        y: f32,
+        speed_x: f32,
         jump_speed: f32,
-        gravity: f32, 
+        gravity: f32,
         control: Control,
         movement: bool,
         collision_reaction_x: f32,
         collision_reaction_y: f32,
         jump: bool,
         jump_height: f32,
-
-    ) -> Self 
-    {
-        Player{
-            pos : Position2::new(x, y),
+    ) -> Self {
+        Player {
+            pos: Position2::new(x, y),
             speed_x,
             jump_speed,
             gravity,
@@ -55,5 +53,4 @@ impl Player{
             points: 0,
         }
     }
-
 }

@@ -1,10 +1,9 @@
-use bevy::prelude::*;
-use crate::world::utils::WORLD_HEIGHT;
 use crate::world::utils::TILE_SIZE;
-
+use crate::world::utils::WORLD_HEIGHT;
+use bevy::prelude::*;
 
 const PLATFORM_BASE_FALL_SPEED: f32 = 150.0;
-const DESPAWN_Y: f32 = -WORLD_HEIGHT / 2.0 + TILE_SIZE  * 1.5;
+const DESPAWN_Y: f32 = -WORLD_HEIGHT / 2.0 + TILE_SIZE * 1.5;
 
 #[derive(Component, Clone, Copy)]
 pub struct PlatformMover {
@@ -43,7 +42,7 @@ pub fn move_platforms_system(
     mut query: Query<(Entity, &PlatformMover, &mut Transform)>,
 ) {
     let t = time.elapsed_secs(); // do sinusa
-    let dt = time.delta_secs();  // do spadania
+    let dt = time.delta_secs(); // do spadania
 
     for (entity, mover, mut transform) in &mut query {
         let horizontal_offset = if mover.horizontal {
@@ -58,6 +57,6 @@ pub fn move_platforms_system(
 
         if transform.translation.y < DESPAWN_Y {
             commands.entity(entity).despawn();
-        } 
+        }
     }
 }

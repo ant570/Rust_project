@@ -1,6 +1,6 @@
-use bevy::prelude::*;
 use crate::player::player::Player;
 use crate::player::spawn::ScoreText;
+use bevy::prelude::*;
 
 pub fn update_score_text(
     query: Query<(&Player, &Children)>,

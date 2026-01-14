@@ -1,13 +1,13 @@
 use bevy::app::{Plugin, Startup, Update};
 
 use crate::AssetServer;
-use crate::Res;
-use crate::Commands;
-use bevy::prelude::{Handle, AudioSource};
-use crate::Resource;
 use crate::AudioPlayer;
+use crate::Commands;
 use crate::PlaybackSettings;
 use crate::Query;
+use crate::Res;
+use crate::Resource;
+use bevy::prelude::{AudioSource, Handle};
 
 #[derive(Resource)]
 
@@ -17,15 +17,14 @@ pub struct GameAudio {
     pub fight: Handle<AudioSource>,
     pub jump: Handle<AudioSource>,
     pub lose: Handle<AudioSource>,
-    pub background: Handle<AudioSource>
+    pub background: Handle<AudioSource>,
 }
 
 pub struct PlatformerGamePluginAudio;
 
 impl Plugin for PlatformerGamePluginAudio {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app
-            .add_systems(Startup, load_audio)
+        app.add_systems(Startup, load_audio)
             .add_systems(Update, play_background_music);
     }
 }
@@ -49,15 +48,14 @@ fn load_audio(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn play_background_music(
     mut commands: Commands,
     audio_assets: Option<Res<GameAudio>>,
-    existing_audio: Query<&AudioPlayer>
+    existing_audio: Query<&AudioPlayer>,
 ) {
-    if existing_audio.is_empty() {
-    if let Some(assets) = audio_assets {
-            commands.spawn((
-                AudioPlayer::new(assets.background.clone()),
-                PlaybackSettings::LOOP,
-            ));
-        }
+    if existing_audio.is_empty()
+        && let Some(assets) = audio_assets
+    {
+        commands.spawn((
+            AudioPlayer::new(assets.background.clone()),
+            PlaybackSettings::LOOP,
+        ));
     }
-
 }
