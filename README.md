@@ -36,6 +36,7 @@ Iteracja 2:
 
 
 Mechanika gry:
+
     Gracz 1: 
     Kierowanie: WSAD
     Atak: F
