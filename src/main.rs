@@ -1,6 +1,7 @@
 use bevy::audio::AudioPlugin;
 use bevy::prelude::*;
 use bevy::window::{MonitorSelection, WindowMode};
+use crate::scenes::game_state::GameState;
 
 mod audio;
 mod physics;
@@ -21,6 +22,8 @@ fn main() {
                 })
                 .set(AudioPlugin { ..default() }),
         )
+        .init_state::<GameState>()
+        .add_plugins(crate::scenes::start_menu::MenuPlugin)
         .add_plugins(crate::scenes::world::PlatformerGamePlugin)
         .add_plugins(crate::player::PlatformerGamePlugin)
         .add_plugins(crate::physics::PlatformerGamePluginCollision)

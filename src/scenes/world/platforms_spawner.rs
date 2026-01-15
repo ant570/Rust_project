@@ -8,7 +8,7 @@ use rand::Rng;
 
 const PLATFORM_SPAWN_INTERVAL: f32 = 3.0;
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct PlatformSpawnTimer(pub Timer);
 
 pub fn setup_platform_spawner(mut commands: Commands) {
