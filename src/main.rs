@@ -5,7 +5,7 @@ use bevy::window::{MonitorSelection, WindowMode};
 mod audio;
 mod physics;
 mod player;
-mod world;
+mod scenes;
 
 fn main() {
     App::new()
@@ -21,7 +21,7 @@ fn main() {
                 })
                 .set(AudioPlugin { ..default() }),
         )
-        .add_plugins(crate::world::PlatformerGamePlugin)
+        .add_plugins(crate::scenes::world::PlatformerGamePlugin)
         .add_plugins(crate::player::PlatformerGamePlugin)
         .add_plugins(crate::physics::PlatformerGamePluginCollision)
         .add_plugins(audio::PlatformerGamePluginAudio)

@@ -1,5 +1,5 @@
-use crate::world::utils::TILE_SIZE;
-use crate::world::utils::WORLD_HEIGHT;
+use crate::scenes::world::utils::TILE_SIZE;
+use crate::scenes::world::utils::WORLD_HEIGHT;
 use bevy::prelude::*;
 
 const PLATFORM_BASE_FALL_SPEED: f32 = 150.0;

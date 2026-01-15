@@ -1,4 +1,4 @@
-use crate::world::utils::*;
+use crate::scenes::world::utils::*;
 use bevy::prelude::*;
 use rand::Rng;
 
