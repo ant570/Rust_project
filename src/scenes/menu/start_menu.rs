@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::color::palettes::css::*;
 use bevy::app::AppExit;
+use crate::scenes::menu::OnMenuScreen;
 
 #[derive(Component)]
 pub enum MenuButtonAction {
@@ -10,8 +11,8 @@ pub enum MenuButtonAction {
     Exit,
 }
 
-#[derive(Component)]
-pub struct OnMenuScreen;
+
+
 pub fn start_menu(mut commands: Commands){
     println!("Menu startuje!");
     commands.spawn((
@@ -83,7 +84,7 @@ pub fn menu_action(
                     next_state.set(crate::scenes::game_state::GameState::Playing);
                 }
                 MenuButtonAction::HowToPlay => {
-                    println!("How to Play button pressed");    
+                    next_state.set(crate::scenes::game_state::GameState::HowToPlay);   
                 }
                 MenuButtonAction::Settings => {
                     println!("Settings button pressed");    
@@ -97,12 +98,3 @@ pub fn menu_action(
     }
 }
 
-pub fn cleanup_menu(
-    mut commands: Commands, 
-    query: Query<Entity, With<OnMenuScreen>>
-) {
-    println!("Exiting Menu");
-    for entity in &query {
-        commands.entity(entity).despawn();
-    }
-}

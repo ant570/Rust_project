@@ -5,5 +5,5 @@ pub enum GameState {
     #[default]
     StartMenu,
     Playing,
-    Paused,
+    HowToPlay,
 }
