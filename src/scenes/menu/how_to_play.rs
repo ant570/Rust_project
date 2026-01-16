@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::color::palettes::css::*;
 use crate::scenes::menu::OnMenuScreen;
+use crate::GameState;
 
 #[derive(Component, PartialEq, Eq)]
 pub enum MenuHtpButtonAction {
@@ -110,10 +111,23 @@ pub fn htp_action(
         (Changed<Interaction>, With<Button>),
     >,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
+    current_state: Res<State<crate::scenes::game_state::GameState>>,
 ) {
     for (interaction, action) in &interaction_query {
         if *interaction == Interaction::Pressed && *action == MenuHtpButtonAction::Back {
-            next_state.set(crate::scenes::game_state::GameState::StartMenu);
+            match current_state.get() { 
+                GameState::HowToPlay1 => {
+                    if *action == MenuHtpButtonAction::Back {
+                        next_state.set(GameState::StartMenu);
+                    }
+                }
+                GameState::HowToPlay2 => {
+                    if *action == MenuHtpButtonAction::Back {
+                        next_state.set(GameState::Paused);
+                    }
+                }
+                _ => {}
+            }
         }
     }
 }

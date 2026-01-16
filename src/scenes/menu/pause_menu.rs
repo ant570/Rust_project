@@ -5,7 +5,9 @@ use crate::scenes::menu::OnMenuScreen;
 
 #[derive(Component)]
 pub enum MenuButtonAction {
-    Play,
+    Continue,
+    FinishNow,
+    Restart,
     HowToPlay,
     Settings,
     Exit,
@@ -13,7 +15,7 @@ pub enum MenuButtonAction {
 
 
 
-pub fn start_menu(mut commands: Commands){
+pub fn pause_menu(mut commands: Commands){
     println!("Menu startuje!");
     commands.spawn((
         OnMenuScreen,
@@ -29,13 +31,15 @@ pub fn start_menu(mut commands: Commands){
     ))
     .with_children(|parent| {
         parent.spawn((
-            Text::new("Platformer Game"),
+            Text::new("Paused"),
             TextFont { font_size: 100.0, ..default() },
             TextColor(Color::from(GOLD)),
             Node { margin: UiRect::bottom(Val::Px(50.0)), ..default() },
         ));
         let button_labels = [
-            ("START", MenuButtonAction::Play),
+            ("CONTINUE", MenuButtonAction::Continue),
+            ("FINISH NOW", MenuButtonAction::FinishNow),
+            ("RESTART", MenuButtonAction::Restart),
             ("HOW TO PLAY", MenuButtonAction::HowToPlay),
             ("SETTINGS", MenuButtonAction::Settings),
             ("EXIT", MenuButtonAction::Exit),
@@ -69,19 +73,30 @@ pub fn start_menu(mut commands: Commands){
     });
 }
 
-pub fn menu_action(
+pub fn pause_menu_action(
     interaction_query: Query<
         (&Interaction, &MenuButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     mut exit: MessageWriter<AppExit>,
+    mut commands: Commands,
+    query: Query<Entity, (Without<Camera>, Without<DirectionalLight>, Without<Window>)>,
 ) {
     for (interaction, action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match action {
-                MenuButtonAction::Play => {
+                MenuButtonAction::Continue => {
                     next_state.set(crate::scenes::game_state::GameState::Playing);
+                }
+                MenuButtonAction::FinishNow => {
+                    println!("Finish now button pressed");
+                }
+                MenuButtonAction::Restart => {
+                    for entity in &query {
+                        commands.entity(entity).despawn();
+                    }
+                    next_state.set(crate::scenes::game_state::GameState::StartMenu);
                 }
                 MenuButtonAction::HowToPlay => {
                     next_state.set(crate::scenes::game_state::GameState::HowToPlay2);   
@@ -97,4 +112,6 @@ pub fn menu_action(
         }
     }
 }
+
+
 

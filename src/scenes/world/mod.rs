@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::scenes::world::platforms_spawner::PlatformSpawnTimer;
-
+use crate::scenes::game_state::GameState;
 pub struct PlatformerGamePlugin;
 
 pub mod coin;
@@ -15,7 +15,10 @@ impl Plugin for PlatformerGamePlugin {
             .init_resource::<PlatformSpawnTimer>()
             .add_systems(Startup, spawn::spawn_camera)
             .add_systems(
-                OnEnter(crate::scenes::game_state::GameState::Playing),
+                OnTransition { 
+                    exited: GameState::StartMenu, 
+                    entered: GameState::Playing
+                },
                 (
                     spawn::spawn_map,
                     platforms_spawner::setup_platform_spawner
@@ -28,6 +31,7 @@ impl Plugin for PlatformerGamePlugin {
                     platforms_spawner::platform_spawner_system,
                     coin::animate_coins
                 )
+                .run_if(in_state(crate::scenes::game_state::GameState::Playing))
             );
     }
 }

@@ -5,6 +5,7 @@ use crate::scenes::menu::how_to_play::spawn_htp;
 
 pub mod start_menu;
 pub mod how_to_play;
+pub mod pause_menu;
 
 pub struct MenuPlugin;
 #[derive(Component)]
@@ -30,9 +31,15 @@ impl Plugin for MenuPlugin{
                 menu_action.run_if(in_state(GameState::StartMenu))
             )
         .add_systems(OnExit(crate::scenes::game_state::GameState::StartMenu), cleanup_menu)
-        .add_systems(OnEnter(GameState::HowToPlay), spawn_htp)
-        .add_systems(Update, how_to_play::htp_action.run_if(in_state(GameState::HowToPlay)))
-        .add_systems(OnExit(GameState::HowToPlay), cleanup_menu);
-            
+        .add_systems(OnEnter(GameState::HowToPlay1), spawn_htp)
+        .add_systems(Update, how_to_play::htp_action.run_if(in_state(GameState::HowToPlay1)))
+        .add_systems(OnExit(GameState::HowToPlay1), cleanup_menu)
+        .add_systems(OnEnter(GameState::Paused), pause_menu::pause_menu)
+        .add_systems(Update, pause_menu::pause_menu_action.run_if(in_state(GameState::Paused)))
+        .add_systems(OnExit(GameState::Paused), cleanup_menu)
+        .add_systems(OnEnter(GameState::HowToPlay2), spawn_htp)
+        .add_systems(Update, how_to_play::htp_action.run_if(in_state(GameState::HowToPlay2)))
+        .add_systems(OnExit(GameState::HowToPlay2), cleanup_menu);
+
     }
 }
