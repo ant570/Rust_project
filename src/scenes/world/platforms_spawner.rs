@@ -1,14 +1,14 @@
-use crate::world::platforms::PlatformMover;
-use crate::world::spawn::Tile;
-use crate::world::spawn::TileType;
-use crate::world::utils::*;
+use crate::scenes::world::platforms::PlatformMover;
+use crate::scenes::world::spawn::Tile;
+use crate::scenes::world::spawn::TileType;
+use crate::scenes::world::utils::*;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use rand::Rng;
 
 const PLATFORM_SPAWN_INTERVAL: f32 = 3.0;
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct PlatformSpawnTimer(pub Timer);
 
 pub fn setup_platform_spawner(mut commands: Commands) {
@@ -65,8 +65,8 @@ pub fn platform_spawner_system(
 
     if platform_size == Vec2::ZERO {
         platform_size = Vec2::new(
-            crate::world::utils::TILE_SIZE,
-            crate::world::utils::TILE_SIZE * 0.5,
+            crate::scenes::world::utils::TILE_SIZE,
+            crate::scenes::world::utils::TILE_SIZE * 0.5,
         );
     }
     platform_size.x *= scale_x;
@@ -91,12 +91,12 @@ pub fn platform_spawner_system(
             },
         ));
         if coin {
-            crate::world::coin::spawn_coin_on_platform(
+            crate::scenes::world::coin::spawn_coin_on_platform(
                 &mut commands,
                 &asset_server,
                 &mut texture_atlas_layouts,
                 Vec3::new(x, y + 60.0, 1.0),
-                crate::world::platforms::PlatformMover::horizontal(
+                crate::scenes::world::platforms::PlatformMover::horizontal(
                     origin,
                     amplitude,
                     speed,
@@ -116,12 +116,12 @@ pub fn platform_spawner_system(
             },
         ));
         if coin {
-            crate::world::coin::spawn_coin_on_platform(
+            crate::scenes::world::coin::spawn_coin_on_platform(
                 &mut commands,
                 &asset_server,
                 &mut texture_atlas_layouts,
                 Vec3::new(x, y + 60.0, 1.0),
-                crate::world::platforms::PlatformMover::falling_only(origin, fall_factor),
+                crate::scenes::world::platforms::PlatformMover::falling_only(origin, fall_factor),
             );
         }
     }

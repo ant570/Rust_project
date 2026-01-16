@@ -2,7 +2,7 @@ use crate::player::player::{Control, Player};
 use crate::player::spawn::ChargeBar;
 use crate::player::spawn::Collider;
 use crate::player::spawn::ScoreText;
-use crate::world::utils::WORLD_WIDTH;
+use crate::scenes::world::utils::WORLD_WIDTH;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
 use bevy::time::Time;

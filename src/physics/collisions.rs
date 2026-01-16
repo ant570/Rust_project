@@ -1,8 +1,8 @@
 use crate::audio::GameAudio;
 use crate::player::player::Player;
 use crate::player::spawn::Collider;
-use crate::world::coin::Coin;
-use crate::world::spawn::{Tile, TileType};
+use crate::scenes::world::coin::Coin;
+use crate::scenes::world::spawn::{Tile, TileType};
 use bevy::prelude::*;
 
 pub const MAX_COLLISION_PUSH: f32 = 30.0;

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::world::platforms::PlatformMover;
+use crate::scenes::world::platforms::PlatformMover;
 
 #[derive(Component)]
 pub struct AnimationConfig {

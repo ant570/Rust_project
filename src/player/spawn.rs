@@ -124,7 +124,7 @@ pub fn check_player_fall(
     audio_assets: Res<GameAudio>,
 ) {
     let mut fallen_entities = Vec::new();
-    let fall_limit = -crate::world::utils::WORLD_HEIGHT / 2.0 - 200.0;
+    let fall_limit = -crate::scenes::world::utils::WORLD_HEIGHT / 2.0 - 200.0;
 
     for (entity, transform, _) in query.iter() {
         if transform.translation.y < fall_limit {

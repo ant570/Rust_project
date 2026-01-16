@@ -4,24 +4,21 @@ use crate::player::player::Player;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
 use bevy::time::Time;
-use std::process;
+
 
 pub fn keyboard_input(
     commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut Transform, &mut Player)>,
+    query: Query<(&mut Transform, &mut Player)>,
     time: Res<Time>,
     audio_assets: Res<GameAudio>,
+    mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
 ) {
     //Zakończenie gry
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        process::exit(0);
-    } else if keyboard_input.just_pressed(KeyCode::Space) {
-        //Zapauzowanie gry
-        for (_transform, mut player) in query.iter_mut() {
-            player.movement = !player.movement;
-        }
-    } else {
+        next_state.set(crate::scenes::game_state::GameState::Paused);
+    } 
+    else {
         //Ruch gracza
         player_movement(commands, keyboard_input, query, time, audio_assets);
     }
