@@ -8,4 +8,5 @@ pub enum GameState {
     HowToPlay1,
     HowToPlay2,
     Paused,
+    Finished,
 }

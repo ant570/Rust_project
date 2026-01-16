@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 use crate::GameState;
+use crate::scenes::menu::finish::spawn_finish_menu;
 use crate::scenes::menu::start_menu::menu_action;
 use crate::scenes::menu::how_to_play::spawn_htp;
 
 pub mod start_menu;
 pub mod how_to_play;
 pub mod pause_menu;
+pub mod finish;
 
 pub struct MenuPlugin;
 #[derive(Component)]
@@ -39,7 +41,10 @@ impl Plugin for MenuPlugin{
         .add_systems(OnExit(GameState::Paused), cleanup_menu)
         .add_systems(OnEnter(GameState::HowToPlay2), spawn_htp)
         .add_systems(Update, how_to_play::htp_action.run_if(in_state(GameState::HowToPlay2)))
-        .add_systems(OnExit(GameState::HowToPlay2), cleanup_menu);
+        .add_systems(OnExit(GameState::HowToPlay2), cleanup_menu)
+        .add_systems(OnEnter(GameState::Finished), spawn_finish_menu)
+        .add_systems(Update, finish::finish_menu_action.run_if(in_state(GameState::Finished)))
+        .add_systems(OnExit(GameState::Finished), cleanup_menu);
 
     }
 }

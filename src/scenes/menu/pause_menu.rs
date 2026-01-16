@@ -90,7 +90,10 @@ pub fn pause_menu_action(
                     next_state.set(crate::scenes::game_state::GameState::Playing);
                 }
                 MenuButtonAction::FinishNow => {
-                    println!("Finish now button pressed");
+                    for entity in &query {
+                        commands.entity(entity).despawn();
+                    }
+                    next_state.set(crate::scenes::game_state::GameState::Finished);
                 }
                 MenuButtonAction::Restart => {
                     for entity in &query {
@@ -105,8 +108,7 @@ pub fn pause_menu_action(
                     println!("Settings button pressed");    
                 }
                 MenuButtonAction::Exit => {
-                    exit.write(AppExit::Success);
-                    //std::process::exit(0);          
+                    exit.write(AppExit::Success);       
                 }
             }
         }

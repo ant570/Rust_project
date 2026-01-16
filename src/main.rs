@@ -15,7 +15,7 @@ fn main() {
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: "XDD".to_string(),
+                        title: "Platformer game".to_string(),
                         mode: WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
                         ..default()
                     }),
