@@ -1,4 +1,14 @@
 use bevy::prelude::*;
+use bevy::color::palettes::css::*;
+use bevy::app::AppExit;
+
+#[derive(Component)]
+pub enum MenuButtonAction {
+    Play,
+    HowToPlay,
+    Settings,
+    Exit,
+}
 
 #[derive(Component)]
 pub struct OnMenuScreen;
@@ -11,48 +21,78 @@ pub fn start_menu(mut commands: Commands){
             height: Val::Percent(100.0),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
+            flex_direction: FlexDirection::Column,
             ..default()
         },
-        BackgroundColor(Color::srgb(0.0, 0.0, 0.2)),
+        BackgroundColor(Color::from(BLACK)),
     ))
     .with_children(|parent| {
         parent.spawn((
-            OnMenuScreen,
-            Button,
-            Node {
-                width: Val::Px(200.0),
-                height: Val::Px(80.0),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            BackgroundColor(Color::srgb(1.0, 0.0, 0.0)),
-        ))
-        .with_children(|parent| {
+            Text::new("Platformer Game"),
+            TextFont { font_size: 100.0, ..default() },
+            TextColor(Color::from(GOLD)),
+            Node { margin: UiRect::bottom(Val::Px(50.0)), ..default() },
+        ));
+        let button_labels = [
+            ("START", MenuButtonAction::Play),
+            ("HOW TO PLAY", MenuButtonAction::HowToPlay),
+            ("SETTINGS", MenuButtonAction::Settings),
+            ("EXIT", MenuButtonAction::Exit),
+        ];
+
+        for (label, action) in button_labels {
             parent.spawn((
+                Button,
+                action,
                 OnMenuScreen,
-                Text::new("Start Game"),
-                TextFont {
-                    font_size: 40.0,
+                Node {
+                    width: Val::Px(500.0),
+                    height: Val::Px(80.0),
+                    margin: UiRect::vertical(Val::Px(20.0)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    border: UiRect::all(Val::Px(5.0)),
                     ..default()
                 },
-                TextColor(Color::WHITE),
-            ));
-        });
+                BorderColor::all(Color::from(GOLD)),
+                BackgroundColor(Color::from(BLACK)),
+            ))
+            .with_children(|button_parent| {
+                button_parent.spawn((
+                    Text::new(label),
+                    TextFont { font_size: 50.0, ..default() },
+                    TextColor(Color::from(GOLD)),
+                ));
+            });
+        }
     });
 }
 
 pub fn menu_action(
-    mut interaction_query: Query<
-        &Interaction,
+    interaction_query: Query<
+        (&Interaction, &MenuButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
+    mut exit: MessageWriter<AppExit>,
 ) {
-    for interaction in &mut interaction_query {
+    for (interaction, action) in &interaction_query {
         if *interaction == Interaction::Pressed {
-            println!("Start Game!");
-            next_state.set(crate::scenes::game_state::GameState::Playing);
+            match action {
+                MenuButtonAction::Play => {
+                    next_state.set(crate::scenes::game_state::GameState::Playing);
+                }
+                MenuButtonAction::HowToPlay => {
+                    println!("How to Play button pressed");    
+                }
+                MenuButtonAction::Settings => {
+                    println!("Settings button pressed");    
+                }
+                MenuButtonAction::Exit => {
+                    exit.write(AppExit::Success);
+                    //std::process::exit(0);          
+                }
+            }
         }
     }
 }
