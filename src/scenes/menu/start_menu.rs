@@ -87,7 +87,7 @@ pub fn menu_action(
                     next_state.set(crate::scenes::game_state::GameState::HowToPlay2);   
                 }
                 MenuButtonAction::Settings => {
-                    println!("Settings button pressed");    
+                    next_state.set(crate::scenes::game_state::GameState::SettingsStart);    
                 }
                 MenuButtonAction::Exit => {
                     exit.write(AppExit::Success);    
