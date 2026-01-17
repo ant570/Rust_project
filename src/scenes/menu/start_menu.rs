@@ -90,8 +90,7 @@ pub fn menu_action(
                     println!("Settings button pressed");    
                 }
                 MenuButtonAction::Exit => {
-                    exit.write(AppExit::Success);
-                    //std::process::exit(0);          
+                    exit.write(AppExit::Success);    
                 }
             }
         }

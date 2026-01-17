@@ -90,9 +90,6 @@ pub fn pause_menu_action(
                     next_state.set(crate::scenes::game_state::GameState::Playing);
                 }
                 MenuButtonAction::FinishNow => {
-                    for entity in &query {
-                        commands.entity(entity).despawn();
-                    }
                     next_state.set(crate::scenes::game_state::GameState::Finished);
                 }
                 MenuButtonAction::Restart => {
