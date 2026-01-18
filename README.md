@@ -22,7 +22,7 @@ Iteracja 2:
 
     [x] Efekty dźwiękowe.
 
-    [ ] Menu startowe/ ekran końca gry/ proste ustawienia.
+    [x] Menu startowe/ ekran końca gry/ proste ustawienia.
 
     [x] Dodanie możliwości zapauzowania gry.
 
@@ -30,9 +30,9 @@ Iteracja 2:
 
     [x] Licznik punktów.
 
-    [ ] Dodanie nowych animacji.
+    [x] Dodanie nowych animacji.
 
-    [ ] Poprawa grafiki.
+    [x] Poprawa grafiki.
 
 
 Mechanika gry:
