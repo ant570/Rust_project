@@ -5,7 +5,7 @@ use crate::scenes::world::coin::Coin;
 use crate::scenes::world::spawn::{Tile, TileType};
 use bevy::prelude::*;
 use crate::scenes::menu::settings::AudioSettingType;
-use crate::scenes::menu::settings::AudioSettings;
+use crate::scenes::menu::settings::Settings;
 use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
 pub const MAX_COLLISION_PUSH: f32 = 30.0;
 
@@ -124,7 +124,7 @@ pub fn player_with_player(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &Collider, &mut Player)>,
     audio_assets: Res<GameAudio>,
-    settings: Res<AudioSettings>,
+    settings: Res<Settings>,
 ) {
     let mut data_vector: Vec<(Entity, f32, f32)> = Vec::new();
     let mut combinations = query.iter_combinations_mut();
@@ -239,7 +239,7 @@ pub fn player_with_coin_collision_system(
     mut player_query: Query<(&Transform, &mut Player, &Sprite)>,
     coin_query: Query<(Entity, &Transform, &Sprite, &Coin)>,
     audio_assets: Res<GameAudio>,
-    settings: Res<AudioSettings>
+    settings: Res<Settings>
 ) {
     for (player_transform, mut player, player_sprite) in &mut player_query {
         let player_pos = player_transform.translation.truncate();

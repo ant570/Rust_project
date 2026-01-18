@@ -5,31 +5,38 @@ use crate::scenes::menu::OnMenuScreen;
 use bevy::ui::RelativeCursorPosition;
 use crate::GameState;
 use bevy::ui::FocusPolicy;
+use bevy::ui::ZIndex;
+#[derive(Component)]
+pub struct WinScoreLabel;
 
 #[derive(Component, PartialEq)]
 pub enum SettingsButtonAction {
-   Back
+   Back,
+   Plus,
+   Minus,
 }
 
 #[derive(Resource)]
-pub struct AudioSettings {
+pub struct Settings {
     pub music_volume: f32,
     pub coin_volume: f32,
     pub jump_volume: f32,
     pub hit_volume: f32,
     pub fail_volume: f32,
     pub damage_volume: f32,
+    pub win_score: u32,
 }
 
-impl Default for AudioSettings {
+impl Default for Settings {
     fn default() -> Self {
-        AudioSettings {
+        Settings {
             music_volume: 0.5,
             coin_volume: 0.5,
             jump_volume: 0.5,
             hit_volume: 0.5,
             fail_volume: 0.5,
             damage_volume: 0.5,
+            win_score: 1000,
         }
     }
 }
@@ -109,7 +116,10 @@ pub fn spawn_volume_slider(
 }
 
 
-pub fn spawn_settings(mut commands: Commands) {
+pub fn spawn_settings(
+    mut commands: Commands,
+    mut settings: ResMut<Settings>,
+) {
     commands.spawn((
         OnMenuScreen,
         Node {
@@ -173,6 +183,76 @@ pub fn spawn_settings(mut commands: Commands) {
             0.5,
         );
 
+        parent.spawn(Node {
+            flex_direction: FlexDirection::Row, 
+            align_items: AlignItems::Center,
+            column_gap: Val::Px(20.0),
+            ..default()
+        }).with_children(|row| {
+
+            row.spawn((
+                Button,
+                SettingsButtonAction::Minus,
+                OnMenuScreen,
+                Node {
+                    width: Val::Px(50.0),
+                    height: Val::Px(50.0),
+                    margin: UiRect::all(Val::Px(10.0)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BackgroundColor(Color::from(RED)),
+            ))
+            .with_children(|btn| {
+                btn.spawn((
+                    Text::new("-"),
+                    TextFont { font_size: 50.0, ..default() },
+                    TextColor(Color::from(WHITE)),
+                ));
+            });
+
+            row.spawn((
+                Text::new("Win Score: "),
+                TextFont { font_size: 25.0, ..default() },
+                TextColor(Color::from(GOLD)),
+                
+            ));
+
+            row.spawn((
+                Text::new(settings.win_score.to_string()),
+                TextFont { font_size: 25.0, ..default() },
+                TextColor(Color::from(GOLD)),
+                WinScoreLabel,
+            ));
+
+            row.spawn((
+                Button,
+                SettingsButtonAction::Plus,
+                OnMenuScreen,
+                Node {
+                    width: Val::Px(50.0),
+                    height: Val::Px(50.0),
+                    margin: UiRect::all(Val::Px(10.0)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BackgroundColor(Color::from(GREEN)),
+            ))
+            .with_children(|btn| {
+                btn.spawn((
+                    Text::new("+"),
+                    TextFont { font_size: 50.0, ..default() },
+                    TextColor(Color::from(WHITE)),
+                ));
+            });
+        });
+
+
+
+        
+
 
         parent.spawn((
             Button,
@@ -202,12 +282,13 @@ pub fn spawn_settings(mut commands: Commands) {
 }
 
 pub fn settings_action(
-    mut settings: ResMut<AudioSettings>,
+    mut settings: ResMut<Settings>,
     interaction_query: Query<(&Interaction, &RelativeCursorPosition, &VolumeSlider, &Children)>,
     mut handle_query: Query<&mut Node, With<SliderHandle>>,
     button_query: Query<(&Interaction, &SettingsButtonAction), (Changed<Interaction>, With<Button>)>,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     current_state: Res<State<crate::scenes::game_state::GameState>>,
+    mut label_query: Query<&mut Text, With<WinScoreLabel>>,
 ) {
     for (interaction, cursor_pos, slider, children) in &interaction_query {
         if *interaction == Interaction::Pressed {
@@ -234,16 +315,34 @@ pub fn settings_action(
     }
 
     for (interaction, action) in &button_query {
-        if *interaction == Interaction::Pressed && *action == SettingsButtonAction::Back {
-            match current_state.get() { 
-                GameState::SettingsStart => {
-                    if *action == SettingsButtonAction::Back {
-                        next_state.set(GameState::StartMenu);
+        if *interaction == Interaction::Pressed {
+            match action {
+                SettingsButtonAction::Plus => {
+                    settings.win_score = settings.win_score.saturating_add(50);
+                    println!("Win score increased to {}", settings.win_score);
+                    for mut text in &mut label_query {
+                        text.0 = settings.win_score.to_string();
                     }
                 }
-                GameState::SettingsPause => {
-                    if *action == SettingsButtonAction::Back {
-                        next_state.set(GameState::Paused);
+                SettingsButtonAction::Minus => {
+                    settings.win_score = settings.win_score.saturating_sub(50);
+                    for mut text in &mut label_query {
+                        text.0 = settings.win_score.to_string();
+                    }
+                }
+                SettingsButtonAction::Back => {
+                    match current_state.get() { 
+                        GameState::SettingsStart => {
+                            if *action == SettingsButtonAction::Back {
+                                next_state.set(GameState::StartMenu);
+                            }
+                        }
+                        GameState::SettingsPause => {
+                            if *action == SettingsButtonAction::Back {
+                                next_state.set(GameState::Paused);
+                            }
+                        }
+                        _ => {}
                     }
                 }
                 _ => {}
