@@ -16,7 +16,6 @@ pub enum MenuButtonAction {
 
 
 pub fn pause_menu(mut commands: Commands){
-    println!("Menu startuje!");
     commands.spawn((
         OnMenuScreen,
         Node {
@@ -102,7 +101,7 @@ pub fn pause_menu_action(
                     next_state.set(crate::scenes::game_state::GameState::HowToPlay2);   
                 }
                 MenuButtonAction::Settings => {
-                    println!("Settings button pressed");    
+                    next_state.set(crate::scenes::game_state::GameState::SettingsPause);  
                 }
                 MenuButtonAction::Exit => {
                     exit.write(AppExit::Success);       

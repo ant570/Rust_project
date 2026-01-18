@@ -9,4 +9,6 @@ pub enum GameState {
     HowToPlay2,
     Paused,
     Finished,
+    SettingsPause,
+    SettingsStart,
 }
