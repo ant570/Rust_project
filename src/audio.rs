@@ -1,4 +1,5 @@
 use bevy::app::{Plugin, Startup, Update};
+use bevy::audio::AudioSink;
 
 use crate::AssetServer;
 use crate::AudioPlayer;
@@ -7,7 +8,14 @@ use crate::PlaybackSettings;
 use crate::Query;
 use crate::Res;
 use crate::Resource;
+use crate::scenes::menu::settings;
 use bevy::prelude::{AudioSource, Handle};
+use bevy::prelude::DetectChanges;
+use crate::With;
+use crate::Component;
+use crate::scenes::menu::settings::AudioSettingType;
+use bevy::prelude::AudioSinkPlayback;
+use crate::Entity;
 
 #[derive(Resource)]
 
@@ -22,10 +30,16 @@ pub struct GameAudio {
 
 pub struct PlatformerGamePluginAudio;
 
+#[derive(Component)]
+pub struct SoundType(pub AudioSettingType);
+
+
 impl Plugin for PlatformerGamePluginAudio {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(Startup, load_audio)
-            .add_systems(Update, play_background_music);
+            .add_systems(Update, play_background_music)
+            .add_systems(Update, sync_volume_settings)
+            .add_systems(Update, cleanup_audio_flood);
     }
 }
 fn load_audio(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -56,6 +70,50 @@ fn play_background_music(
         commands.spawn((
             AudioPlayer::new(assets.background.clone()),
             PlaybackSettings::LOOP,
+            SoundType(AudioSettingType::Music),
         ));
+    }
+}
+
+fn sync_volume_settings(
+    settings: Res<settings::AudioSettings>,
+    mut query: Query<(&SoundType, &mut PlaybackSettings, Option<&mut AudioSink>)>,
+) {
+    if settings.is_changed() {
+        for (sound_type, mut playback, sink) in &mut query {
+            let volume = match sound_type.0 {
+                AudioSettingType::Music => settings.music_volume,
+                AudioSettingType::Jump => settings.jump_volume,
+                AudioSettingType::Coin => settings.coin_volume,
+                AudioSettingType::Damage => settings.damage_volume,
+                AudioSettingType::Fail => settings.fail_volume,
+                AudioSettingType::Hit => settings.hit_volume,
+            };
+            let new_volume = bevy::audio::Volume::Linear(volume);
+
+            if playback.volume != new_volume {
+                playback.volume = new_volume;
+            }
+            if let Some(mut sink2) = sink {
+                if !sink2.empty() {
+                    sink2.set_volume(new_volume);
+                }
+            }
+        }
+    }
+}
+
+
+pub fn cleanup_audio_flood(
+    mut commands: Commands,
+    query: Query<(Entity, &AudioSink, &SoundType), With<SoundType>>,
+) {
+    for (entity, sink, sound_type) in &query {
+        if sound_type.0 != AudioSettingType::Music {
+
+            if sink.empty() {
+                commands.entity(entity).despawn();
+            }
+        }
     }
 }

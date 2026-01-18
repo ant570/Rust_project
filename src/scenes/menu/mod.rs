@@ -18,7 +18,6 @@ pub fn cleanup_menu(
     mut commands: Commands, 
     query: Query<Entity, With<OnMenuScreen>>
 ) {
-    println!("Exiting Menu");
     for entity in &query {
         commands.entity(entity).despawn();
     }
@@ -52,7 +51,12 @@ impl Plugin for MenuPlugin{
         .add_systems(OnExit(GameState::SettingsStart), cleanup_menu)
         .add_systems(OnEnter(GameState::SettingsPause), spawn_settings)
         .add_systems(Update, settings::settings_action.run_if(in_state(GameState::SettingsPause)))
-        .add_systems(OnExit(GameState::SettingsPause), cleanup_menu);
+        .add_systems(OnExit(GameState::SettingsPause), cleanup_menu)
+        .init_resource::<settings::AudioSettings>()
+        .add_systems(Update, settings::settings_action.run_if(
+            in_state(GameState::SettingsStart)
+            .or(in_state(GameState::SettingsPause))
+        ));
 
     }
 }

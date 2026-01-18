@@ -1,10 +1,13 @@
 use crate::audio::GameAudio;
+use crate::audio::SoundType;
 use crate::player::player::Control;
 use crate::player::player::Player;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
+use crate::scenes::menu::settings::AudioSettings;
 use bevy::time::Time;
-
+use crate::scenes::menu::settings::AudioSettingType;
+use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
 
 pub fn keyboard_input(
     commands: Commands,
@@ -13,6 +16,7 @@ pub fn keyboard_input(
     time: Res<Time>,
     audio_assets: Res<GameAudio>,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
+    settings: Res<AudioSettings>,
 ) {
     //Zakończenie gry
     if keyboard_input.just_pressed(KeyCode::Escape) {
@@ -20,7 +24,7 @@ pub fn keyboard_input(
     } 
     else {
         //Ruch gracza
-        player_movement(commands, keyboard_input, query, time, audio_assets);
+        player_movement(commands, keyboard_input, query, time, audio_assets, settings);
     }
 }
 
@@ -30,6 +34,7 @@ pub fn player_movement(
     mut query: Query<(&mut Transform, &mut Player)>,
     time: Res<Time>,
     audio_assets: Res<GameAudio>,
+    settings: Res<AudioSettings>,
 ) {
     for (mut transform, mut player) in query.iter_mut() {
         //Sprawdzenie czy nie jest zatrzymany
@@ -53,7 +58,15 @@ pub fn player_movement(
 
                 //Movement y
                 if keyboard_input.just_pressed(KeyCode::KeyW) && player.jump {
-                    commands.spawn(AudioPlayer::new(audio_assets.jump.clone()));
+                    commands.spawn((
+                        AudioPlayer::new(audio_assets.jump.clone()),
+                        PlaybackSettings {
+                            mode: PlaybackMode::Despawn,
+                            volume: bevy::audio::Volume::Linear(settings.jump_volume),
+                            ..PlaybackSettings::ONCE
+                        },
+                        SoundType(AudioSettingType::Jump),
+                    ));
                     player.y_move += player.jump_height;
                     player.jump = false;
                 }
@@ -72,7 +85,15 @@ pub fn player_movement(
 
                 //Movement y
                 if keyboard_input.just_pressed(KeyCode::ArrowUp) && player.jump {
-                    commands.spawn(AudioPlayer::new(audio_assets.jump.clone()));
+                    commands.spawn((
+                        AudioPlayer::new(audio_assets.jump.clone()),
+                        PlaybackSettings {
+                            mode: PlaybackMode::Despawn,
+                            volume: bevy::audio::Volume::Linear(settings.jump_volume),
+                            ..PlaybackSettings::ONCE
+                        },
+                        SoundType(AudioSettingType::Jump),
+                    ));
                     println!("{}", player.jump_speed);
                     player.y_move += player.jump_height;
                     player.jump = false;
@@ -87,7 +108,8 @@ pub fn player_movement(
         player.pos.x += movement_x * player.speed_x;
         transform.translation.x += movement_x * player.speed_x;
         movement_y -= player.gravity;
-        player.pos.y += movement_y; //grawitacja
         transform.translation.y += movement_y;
+        player.pos.y += movement_y; //grawitacja
+        
     }
 }

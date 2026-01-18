@@ -1,10 +1,12 @@
-use crate::audio::GameAudio;
+use crate::audio::{GameAudio, SoundType};
 use crate::player::player::Player;
 use crate::player::spawn::Collider;
 use crate::scenes::world::coin::Coin;
 use crate::scenes::world::spawn::{Tile, TileType};
 use bevy::prelude::*;
-
+use crate::scenes::menu::settings::AudioSettingType;
+use crate::scenes::menu::settings::AudioSettings;
+use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
 pub const MAX_COLLISION_PUSH: f32 = 30.0;
 
 pub fn make_rect(transform: &Transform, collider: &Collider) -> Rect {
@@ -122,6 +124,7 @@ pub fn player_with_player(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &Collider, &mut Player)>,
     audio_assets: Res<GameAudio>,
+    settings: Res<AudioSettings>,
 ) {
     let mut data_vector: Vec<(Entity, f32, f32)> = Vec::new();
     let mut combinations = query.iter_combinations_mut();
@@ -137,7 +140,15 @@ pub fn player_with_player(
         if intersects(&rect1, &rect2) {
             let details = claculate_collision(rect1, rect2);
             if details[0] != 0.0 {
-                commands.spawn(AudioPlayer::new(audio_assets.fight.clone()));
+                commands.spawn((
+                    AudioPlayer::new(audio_assets.fight.clone()),
+                    PlaybackSettings {
+                        mode: PlaybackMode::Despawn,
+                        volume: bevy::audio::Volume::Linear(settings.hit_volume),
+                        ..PlaybackSettings::ONCE
+                    },
+                    SoundType(AudioSettingType::Damage),
+                ));
                 player1_component.points += 1;
                 player2_component.points += 1;
                 //x collisions
@@ -152,7 +163,16 @@ pub fn player_with_player(
                     data_vector.push((entity_id2, -player1_component.collision_reaction_x, 0.0));
                 }
             } else if details[1] != 0.0 {
-                commands.spawn(AudioPlayer::new(audio_assets.damage.clone()));
+                commands.spawn((
+                    AudioPlayer::new(audio_assets.damage.clone()),
+                    PlaybackSettings {
+                        mode: PlaybackMode::Despawn,
+                        volume: bevy::audio::Volume::Linear(settings.hit_volume),
+                        ..PlaybackSettings::ONCE
+                    },
+                    
+                    SoundType(AudioSettingType::Damage),
+                ));
                 //y collisions
                 let distance = details[1];
                 if distance > 0.0 {
@@ -174,7 +194,15 @@ pub fn player_with_player(
                     //     player1_component.collision_reaction_y * -1.0,
                     // ));
                 } else {
-                    commands.spawn(AudioPlayer::new(audio_assets.damage.clone()));
+                    commands.spawn((
+                        AudioPlayer::new(audio_assets.damage.clone()),
+                        PlaybackSettings {
+                            mode: PlaybackMode::Despawn,
+                            volume: bevy::audio::Volume::Linear(settings.hit_volume),
+                            ..PlaybackSettings::ONCE
+                        },
+                        SoundType(AudioSettingType::Damage),
+                    ));
                     data_vector.push((entity_id1, 0.0, player1_component.collision_reaction_y));
 
                     player2_component.y_move = 0.0;
@@ -211,6 +239,7 @@ pub fn player_with_coin_collision_system(
     mut player_query: Query<(&Transform, &mut Player, &Sprite)>,
     coin_query: Query<(Entity, &Transform, &Sprite, &Coin)>,
     audio_assets: Res<GameAudio>,
+    settings: Res<AudioSettings>
 ) {
     for (player_transform, mut player, player_sprite) in &mut player_query {
         let player_pos = player_transform.translation.truncate();
@@ -220,12 +249,18 @@ pub fn player_with_coin_collision_system(
             let coin_size = coin_sprite.custom_size.unwrap_or(Vec2::ZERO);
             let coin_pos = coin_transform.translation.truncate();
             if aabb_collision(player_pos, player_size, coin_pos, coin_size) {
-                commands.spawn(AudioPlayer::new(audio_assets.coin_pickup.clone()));
+                commands.spawn((
+                    AudioPlayer::new(audio_assets.coin_pickup.clone()),
+                    PlaybackSettings {
+                        mode: PlaybackMode::Despawn,
+                        volume: bevy::audio::Volume::Linear(settings.coin_volume),
+                        ..PlaybackSettings::ONCE
+                    },
+                    SoundType(AudioSettingType::Coin),
+                ));
                 player.points += 25; // Dodawanie punktów
                 commands.entity(coin_entity).despawn(); // usuwanie monety
-            } //else {
-
-            //}
+            } 
         }
     }
 }

@@ -5,6 +5,10 @@ use crate::player::player::Control::Arrows;
 use crate::player::player::Control::Wasd;
 use crate::player::player::Player;
 use bevy::prelude::*;
+use crate::audio::SoundType;
+use crate::scenes::menu::settings::AudioSettingType;
+use crate::scenes::menu::settings::AudioSettings;
+use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
 const PLAYER_WIDTH: f32 = 150.0;
 const PLAYER_HEIGHT: f32 = 150.0;
 #[derive(Component)]
@@ -122,13 +126,13 @@ pub fn check_player_fall(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &mut Player)>,
     audio_assets: Res<GameAudio>,
+    settings: Res<AudioSettings>
 ) {
     let mut fallen_entities = Vec::new();
     let fall_limit = -crate::scenes::world::utils::WORLD_HEIGHT / 2.0 - 200.0;
 
     for (entity, transform, _) in query.iter() {
         if transform.translation.y < fall_limit {
-            commands.spawn(AudioPlayer::new(audio_assets.lose.clone()));
             fallen_entities.push(entity);
         }
     }
@@ -139,6 +143,16 @@ pub fn check_player_fall(
 
     for (entity, mut transform, mut player) in query.iter_mut() {
         if fallen_entities.contains(&entity) {
+            commands.spawn((
+                AudioPlayer::new(audio_assets.lose.clone()),
+                PlaybackSettings {
+                    mode: PlaybackMode::Despawn,
+                    volume: bevy::audio::Volume::Linear(settings.hit_volume),
+                    ..PlaybackSettings::ONCE
+                },
+                SoundType(AudioSettingType::Fail),
+            ));
+
             transform.translation.y = 200.0;
             transform.translation.x = 0.0;
 

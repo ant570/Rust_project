@@ -1,8 +1,10 @@
-use bevy::ecs::spawn;
+
 use bevy::prelude::*;
 use bevy::color::palettes::css::*;
 use crate::scenes::menu::OnMenuScreen;
+use bevy::ui::RelativeCursorPosition;
 use crate::GameState;
+use bevy::ui::FocusPolicy;
 
 #[derive(Component, PartialEq)]
 pub enum SettingsButtonAction {
@@ -10,7 +12,7 @@ pub enum SettingsButtonAction {
 }
 
 #[derive(Resource)]
-pub struct AudioSetings {
+pub struct AudioSettings {
     pub music_volume: f32,
     pub coin_volume: f32,
     pub jump_volume: f32,
@@ -19,9 +21,9 @@ pub struct AudioSetings {
     pub damage_volume: f32,
 }
 
-impl Default for AudioSetings {
+impl Default for AudioSettings {
     fn default() -> Self {
-        AudioSetings {
+        AudioSettings {
             music_volume: 0.5,
             coin_volume: 0.5,
             jump_volume: 0.5,
@@ -58,7 +60,7 @@ pub fn spawn_volume_slider(
 ) {
     parent.spawn((
         Node {
-            width: Val::Px(400.0),
+            width: Val::Px(450.0),
             height: Val::Px(50.0),
             margin: UiRect::vertical(Val::Px(10.0)),
             flex_direction: FlexDirection::Row,
@@ -75,7 +77,6 @@ pub fn spawn_volume_slider(
             Node { width: Val::Px(100.0), ..default() },
         ));
 
-        // Slider Track
         slider.spawn((
             Node {
                 width: Val::Px(250.0),
@@ -94,11 +95,14 @@ pub fn spawn_volume_slider(
                     width: Val::Px(20.0),
                     height: Val::Px(40.0),
                     position_type: PositionType::Absolute,
-                    left: Val::Percent(initial_value * 100.0 - 2.5),
-                    top: Val::Px(-10.0),
+                    left: Val::Percent(initial_value * 100.0 - 4.0),
+                    top: Val::Px(-9.0),
                     ..default()
                 },
+                BackgroundColor(Color::from(GOLD)),
+                ZIndex(1),
                 SliderHandle,
+                FocusPolicy::Pass,
             ));
         });
     });
@@ -134,6 +138,42 @@ pub fn spawn_settings(mut commands: Commands) {
             0.5,
         );
 
+        spawn_volume_slider(
+            parent,
+            "Coin Volume",
+            AudioSettingType::Coin,
+            0.5,
+        );
+
+        spawn_volume_slider(
+            parent,
+            "Jump Volume",
+            AudioSettingType::Jump,
+            0.5,
+        );
+
+        spawn_volume_slider(
+            parent,
+            "Hit Volume",
+            AudioSettingType::Hit,
+            0.5,
+        );
+
+        spawn_volume_slider(
+            parent,
+            "Fail Volume",
+            AudioSettingType::Fail,
+            0.5,
+        );
+
+        spawn_volume_slider(
+            parent,
+            "Damage Volume",
+            AudioSettingType::Damage,
+            0.5,
+        );
+
+
         parent.spawn((
             Button,
             SettingsButtonAction::Back,
@@ -162,14 +202,38 @@ pub fn spawn_settings(mut commands: Commands) {
 }
 
 pub fn settings_action(
-    interaction_query: Query<
-        (&Interaction, &SettingsButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
+    mut settings: ResMut<AudioSettings>,
+    interaction_query: Query<(&Interaction, &RelativeCursorPosition, &VolumeSlider, &Children)>,
+    mut handle_query: Query<&mut Node, With<SliderHandle>>,
+    button_query: Query<(&Interaction, &SettingsButtonAction), (Changed<Interaction>, With<Button>)>,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     current_state: Res<State<crate::scenes::game_state::GameState>>,
 ) {
-    for (interaction, action) in &interaction_query {
+    for (interaction, cursor_pos, slider, children) in &interaction_query {
+        if *interaction == Interaction::Pressed {
+            if let Some(pos) = cursor_pos.normalized {
+                let x = pos.x + 0.5;
+                let clamped_x = x.clamp(0.0, 1.0);
+                match slider.setting_type {
+                    AudioSettingType::Music => settings.music_volume = clamped_x,
+                    AudioSettingType::Coin => settings.coin_volume = clamped_x,
+                    AudioSettingType::Jump => settings.jump_volume = clamped_x,
+                    AudioSettingType::Hit => settings.hit_volume = clamped_x,
+                    AudioSettingType::Fail => settings.fail_volume = clamped_x,
+                    AudioSettingType::Damage => settings.damage_volume = clamped_x,
+                }
+                for child in children.iter() {
+                    if let Ok(mut handle_node) = handle_query.get_mut(child) {
+                        let x = clamped_x.clamp(0.04, 0.96);
+                        handle_node.left = Val::Percent(x * 100.0 - 4.0);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    for (interaction, action) in &button_query {
         if *interaction == Interaction::Pressed && *action == SettingsButtonAction::Back {
             match current_state.get() { 
                 GameState::SettingsStart => {
@@ -185,5 +249,5 @@ pub fn settings_action(
                 _ => {}
             }
         }
-    }
+    }       
 }

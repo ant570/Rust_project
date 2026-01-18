@@ -16,7 +16,6 @@ pub enum MenuButtonAction {
 
 
 pub fn pause_menu(mut commands: Commands){
-    println!("Menu startuje!");
     commands.spawn((
         OnMenuScreen,
         Node {

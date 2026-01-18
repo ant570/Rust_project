@@ -14,7 +14,6 @@ pub enum MenuButtonAction {
 
 
 pub fn start_menu(mut commands: Commands){
-    println!("Menu startuje!");
     commands.spawn((
         OnMenuScreen,
         Node {
