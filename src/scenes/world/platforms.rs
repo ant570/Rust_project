@@ -43,7 +43,7 @@ pub fn move_platforms_system(
 ) {
     let t = time.elapsed_secs(); // do sinusa
     let dt = time.delta_secs(); // do spadania
-    
+
     for (entity, mover, mut transform) in &mut query {
         let horizontal_offset = if mover.horizontal {
             (t * mover.speed).sin() * mover.amplitude

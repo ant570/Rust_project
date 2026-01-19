@@ -50,16 +50,16 @@ pub fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>) {
             let end = start + hole_width;
 
             let mut overlapping_hole = false;
-            for k in start..end {
-                if !bottom_presence[k] {
+            for present in bottom_presence.iter().take(end).skip(start) {
+                if !*present {
                     overlapping_hole = true;
                     break;
                 }
             }
 
             if !overlapping_hole {
-                for k in start..end {
-                    bottom_presence[k] = false;
+                for present in bottom_presence.iter_mut().take(end).skip(start) {
+                    *present = false;
                 }
                 break;
             }

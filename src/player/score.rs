@@ -1,4 +1,4 @@
-use crate::player::player::Player;
+use crate::player::core::Player;
 use crate::player::spawn::ScoreText;
 use bevy::prelude::*;
 

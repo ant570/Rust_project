@@ -1,14 +1,15 @@
 use crate::audio::GameAudio;
-use crate::player::attack::{AttackState, STICK_BASE_RANGE, STICK_THICKNESS, Stick};
-use crate::player::player::Control;
-use crate::player::player::Control::Arrows;
-use crate::player::player::Control::Wasd;
-use crate::player::player::Player;
-use bevy::prelude::*;
 use crate::audio::SoundType;
+use crate::player::attack::{AttackState, STICK_BASE_RANGE, STICK_THICKNESS, Stick};
+use crate::player::core::Control;
+use crate::player::core::Control::Arrows;
+use crate::player::core::Control::Wasd;
+use crate::player::core::Player;
+use crate::player::core::PlayerConfig;
 use crate::scenes::menu::settings::AudioSettingType;
 use crate::scenes::menu::settings::Settings;
 use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
+use bevy::prelude::*;
 const PLAYER_WIDTH: f32 = 150.0;
 const PLAYER_HEIGHT: f32 = 150.0;
 #[derive(Component)]
@@ -16,40 +17,54 @@ pub struct Collider {
     pub half_size: Vec2,
 }
 
+pub struct SpawnPlayerConfig {
+    pub player_texture: Handle<Image>,
+    pub x: f32,
+    pub y: f32,
+    pub control: Control,
+    pub movement: bool,
+    pub collision_reaction_x: f32,
+    pub collision_reaction_y: f32,
+}
+
 pub fn spawn_players(mut commands: Commands, asset_server: Res<AssetServer>) {
     spawn_player(
         &mut commands,
-        asset_server.load("players/player1.png"),
-        200.0,
-        0.0,
-        Arrows,
-        true,
-        200.0,
-        200.0,
+        SpawnPlayerConfig {
+            player_texture: asset_server.load("players/player1.png"),
+            x: 200.0,
+            y: 0.0,
+            control: Arrows,
+            movement: true,
+            collision_reaction_x: 200.0,
+            collision_reaction_y: 200.0,
+        },
     );
 
     spawn_player(
         &mut commands,
-        asset_server.load("players/player2.png"),
-        -200.0,
-        0.0,
-        Wasd,
-        true,
-        200.0,
-        200.0,
+        SpawnPlayerConfig {
+            player_texture: asset_server.load("players/player2.png"),
+            x: -200.0,
+            y: 0.0,
+            control: Wasd,
+            movement: true,
+            collision_reaction_x: 200.0,
+            collision_reaction_y: 200.0,
+        },
     );
 }
 
-pub fn spawn_player(
-    commands: &mut Commands,
-    player_texture: Handle<Image>,
-    x: f32,
-    y: f32,
-    control: Control,
-    movement: bool,
-    collision_reaction_x: f32,
-    collision_reaction_y: f32,
-) {
+pub fn spawn_player(commands: &mut Commands, config: SpawnPlayerConfig) {
+    let SpawnPlayerConfig {
+        player_texture,
+        x,
+        y,
+        control,
+        movement,
+        collision_reaction_x,
+        collision_reaction_y,
+    } = config;
     let player_size = Vec2::new(PLAYER_HEIGHT, PLAYER_HEIGHT);
     let mut _entity = commands
         .spawn((
@@ -59,19 +74,19 @@ pub fn spawn_player(
                 ..default()
             },
             Transform::from_xyz(x, y, 0.0),
-            Player::new(
+            Player::new(PlayerConfig {
                 x,
                 y,
-                500.0,
-                3000.0,
-                13.0,
+                speed_x: 500.0,
+                jump_speed: 3000.0,
+                gravity: 13.0,
                 control,
                 movement,
                 collision_reaction_x,
                 collision_reaction_y,
-                false,
-                700.0,
-            ),
+                jump: false,
+                jump_height: 700.0,
+            }),
             AttackState {
                 charge: 0.0,
                 facing: 1.0,
@@ -126,7 +141,7 @@ pub fn check_player_fall(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &mut Player)>,
     audio_assets: Res<GameAudio>,
-    settings: Res<Settings>
+    settings: Res<Settings>,
 ) {
     let mut fallen_entities = Vec::new();
     let fall_limit = -crate::scenes::world::utils::WORLD_HEIGHT / 2.0 - 200.0;

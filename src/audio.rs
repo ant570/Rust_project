@@ -4,19 +4,19 @@ use bevy::audio::AudioSink;
 use crate::AssetServer;
 use crate::AudioPlayer;
 use crate::Commands;
+use crate::Component;
+use crate::Entity;
 use crate::PlaybackSettings;
 use crate::Query;
 use crate::Res;
 use crate::Resource;
-use crate::scenes::menu::settings;
-use bevy::prelude::{AudioSource, Handle};
-use bevy::prelude::DetectChanges;
 use crate::With;
-use crate::Component;
+use crate::scenes::menu::settings;
 use crate::scenes::menu::settings::AudioSettingType;
-use bevy::prelude::AudioSinkPlayback;
-use crate::Entity;
 use crate::scenes::menu::settings::Settings;
+use bevy::prelude::AudioSinkPlayback;
+use bevy::prelude::DetectChanges;
+use bevy::prelude::{AudioSource, Handle};
 
 #[derive(Resource)]
 
@@ -33,7 +33,6 @@ pub struct PlatformerGamePluginAudio;
 
 #[derive(Component)]
 pub struct SoundType(pub AudioSettingType);
-
 
 impl Plugin for PlatformerGamePluginAudio {
     fn build(&self, app: &mut bevy::prelude::App) {
@@ -72,7 +71,7 @@ fn play_background_music(
         commands.spawn((
             AudioPlayer::new(assets.background.clone()),
             PlaybackSettings {
-                volume : bevy::audio::Volume::Linear(settings.music_volume),
+                volume: bevy::audio::Volume::Linear(settings.music_volume),
                 ..PlaybackSettings::LOOP
             },
             SoundType(AudioSettingType::Music),
@@ -99,26 +98,22 @@ fn sync_volume_settings(
             if playback.volume != new_volume {
                 playback.volume = new_volume;
             }
-            if let Some(mut sink2) = sink {
-                if !sink2.empty() {
-                    sink2.set_volume(new_volume);
-                }
+            if let Some(mut sink2) = sink
+                && !sink2.empty()
+            {
+                sink2.set_volume(new_volume);
             }
         }
     }
 }
-
 
 pub fn cleanup_audio_flood(
     mut commands: Commands,
     query: Query<(Entity, &AudioSink, &SoundType), With<SoundType>>,
 ) {
     for (entity, sink, sound_type) in &query {
-        if sound_type.0 != AudioSettingType::Music {
-
-            if sink.empty() {
-                commands.entity(entity).despawn();
-            }
+        if sound_type.0 != AudioSettingType::Music && sink.empty() {
+            commands.entity(entity).despawn();
         }
     }
 }

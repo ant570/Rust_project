@@ -1,8 +1,8 @@
+use crate::scenes::game_state::GameState;
+use crate::scenes::menu::MenuPlugin;
 use bevy::audio::AudioPlugin;
 use bevy::prelude::*;
 use bevy::window::{MonitorSelection, WindowMode};
-use crate::scenes::game_state::GameState;
-use crate::scenes::menu::MenuPlugin;
 
 mod audio;
 mod physics;

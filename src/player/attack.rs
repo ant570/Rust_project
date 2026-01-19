@@ -1,4 +1,4 @@
-use crate::player::player::{Control, Player};
+use crate::player::core::{Control, Player};
 use crate::player::spawn::ChargeBar;
 use crate::player::spawn::Collider;
 use crate::player::spawn::ScoreText;
@@ -14,6 +14,38 @@ const CHARGE_RATE: f32 = 1.0;
 const MAX_CHARGE: f32 = 1.5;
 const FORCE_BASE: f32 = 50.0; // When only pressed
 const FORCE_PER_CHARGE: f32 = 700.0; // When fully charged
+
+type PlayerQuery<'w, 's> = Query<
+    'w,
+    's,
+    (
+        Entity,
+        &'static mut Transform,
+        &'static Collider,
+        &'static mut Player,
+        &'static mut AttackState,
+        &'static Children,
+    ),
+    Without<Stick>,
+>;
+
+type StickQuery<'w, 's> =
+    Query<'w, 's, (&'static mut Transform, &'static mut Sprite), (With<Stick>, Without<Player>)>;
+
+type ScoreTextQuery<'w, 's> =
+    Query<'w, 's, &'static mut Transform, (With<ScoreText>, Without<Player>, Without<Stick>)>;
+
+type ChargeBarQuery<'w, 's> = Query<
+    'w,
+    's,
+    (&'static mut Transform, &'static mut Sprite),
+    (
+        With<ChargeBar>,
+        Without<Player>,
+        Without<Stick>,
+        Without<ScoreText>,
+    ),
+>;
 
 #[derive(Component)]
 pub struct AttackState {
@@ -38,28 +70,10 @@ fn rects_intersect(min_a: Vec2, max_a: Vec2, min_b: Vec2, max_b: Vec2) -> bool {
 pub fn stick_attack(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
-    mut players: Query<
-        (
-            Entity,
-            &mut Transform,
-            &Collider,
-            &mut Player,
-            &mut AttackState,
-            &Children,
-        ),
-        Without<Stick>,
-    >,
-    mut sticks: Query<(&mut Transform, &mut Sprite), (With<Stick>, Without<Player>)>,
-    mut score_texts: Query<&mut Transform, (With<ScoreText>, Without<Player>, Without<Stick>)>,
-    mut charge_bars: Query<
-        (&mut Transform, &mut Sprite),
-        (
-            With<ChargeBar>,
-            Without<Player>,
-            Without<Stick>,
-            Without<ScoreText>,
-        ),
-    >,
+    mut players: PlayerQuery,
+    mut sticks: StickQuery,
+    mut score_texts: ScoreTextQuery,
+    mut charge_bars: ChargeBarQuery,
 ) {
     for (_entity, mut transform, collider, player, mut state, children) in players.iter_mut() {
         let (left_pressed, right_pressed, attack_pressed) = match player.control {

@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::GameState;
+use bevy::prelude::*;
 pub mod collisions;
 pub struct PlatformerGamePluginCollision;
 
@@ -12,7 +12,7 @@ impl Plugin for PlatformerGamePluginCollision {
                 collisions::player_with_player,
                 collisions::player_with_coin_collision_system,
             )
-            .run_if(in_state(GameState::Playing)),
+                .run_if(in_state(GameState::Playing)),
         );
     }
 }

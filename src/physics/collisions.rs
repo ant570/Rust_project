@@ -1,12 +1,12 @@
 use crate::audio::{GameAudio, SoundType};
-use crate::player::player::Player;
+use crate::player::core::Player;
 use crate::player::spawn::Collider;
-use crate::scenes::world::coin::Coin;
-use crate::scenes::world::spawn::{Tile, TileType};
-use bevy::prelude::*;
 use crate::scenes::menu::settings::AudioSettingType;
 use crate::scenes::menu::settings::Settings;
+use crate::scenes::world::coin::Coin;
+use crate::scenes::world::spawn::{Tile, TileType};
 use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
+use bevy::prelude::*;
 pub const MAX_COLLISION_PUSH: f32 = 30.0;
 
 pub fn make_rect(transform: &Transform, collider: &Collider) -> Rect {
@@ -169,7 +169,6 @@ pub fn player_with_player(
                         volume: bevy::audio::Volume::Linear(settings.hit_volume),
                         ..PlaybackSettings::ONCE
                     },
-                    
                     SoundType(AudioSettingType::Damage),
                 ));
                 //y collisions
@@ -237,7 +236,7 @@ pub fn player_with_coin_collision_system(
     mut player_query: Query<(&Transform, &mut Player, &Sprite)>,
     coin_query: Query<(Entity, &Transform, &Sprite, &Coin)>,
     audio_assets: Res<GameAudio>,
-    settings: Res<Settings>
+    settings: Res<Settings>,
 ) {
     for (player_transform, mut player, player_sprite) in &mut player_query {
         let player_pos = player_transform.translation.truncate();
@@ -258,7 +257,7 @@ pub fn player_with_coin_collision_system(
                 ));
                 player.points += settings.coin_score; // Dodawanie punktów
                 commands.entity(coin_entity).despawn(); // usuwanie monety
-            } 
+            }
         }
     }
 }

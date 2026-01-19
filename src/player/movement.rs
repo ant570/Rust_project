@@ -1,13 +1,13 @@
 use crate::audio::GameAudio;
 use crate::audio::SoundType;
-use crate::player::player::Control;
-use crate::player::player::Player;
+use crate::player::core::Control;
+use crate::player::core::Player;
+use crate::scenes::menu::settings::AudioSettingType;
+use crate::scenes::menu::settings::Settings;
+use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
-use crate::scenes::menu::settings::Settings;
 use bevy::time::Time;
-use crate::scenes::menu::settings::AudioSettingType;
-use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
 
 pub fn keyboard_input(
     commands: Commands,
@@ -21,10 +21,16 @@ pub fn keyboard_input(
     //Zakończenie gry
     if keyboard_input.just_pressed(KeyCode::Escape) {
         next_state.set(crate::scenes::game_state::GameState::Paused);
-    } 
-    else {
+    } else {
         //Ruch gracza
-        player_movement(commands, keyboard_input, query, time, audio_assets, settings);
+        player_movement(
+            commands,
+            keyboard_input,
+            query,
+            time,
+            audio_assets,
+            settings,
+        );
     }
 }
 
@@ -110,6 +116,5 @@ pub fn player_movement(
         movement_y -= player.gravity;
         transform.translation.y += movement_y;
         player.pos.y += movement_y; //grawitacja
-        
     }
 }
