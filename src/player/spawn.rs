@@ -7,7 +7,7 @@ use crate::player::player::Player;
 use bevy::prelude::*;
 use crate::audio::SoundType;
 use crate::scenes::menu::settings::AudioSettingType;
-use crate::scenes::menu::settings::AudioSettings;
+use crate::scenes::menu::settings::Settings;
 use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
 const PLAYER_WIDTH: f32 = 150.0;
 const PLAYER_HEIGHT: f32 = 150.0;
@@ -126,7 +126,7 @@ pub fn check_player_fall(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &mut Player)>,
     audio_assets: Res<GameAudio>,
-    settings: Res<AudioSettings>
+    settings: Res<Settings>
 ) {
     let mut fallen_entities = Vec::new();
     let fall_limit = -crate::scenes::world::utils::WORLD_HEIGHT / 2.0 - 200.0;
@@ -169,7 +169,7 @@ pub fn check_player_fall(
             player.jump = false;
             player.y_move = 0.0;
         } else {
-            player.points += 500;
+            player.points += settings.fall_score;
         }
     }
 }

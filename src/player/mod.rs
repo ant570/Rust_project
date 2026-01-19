@@ -27,6 +27,7 @@ impl Plugin for PlatformerGamePlugin {
                     attack::stick_attack,
                     spawn::check_player_fall,
                     score::update_score_text,
+                    score::check_win_condition,
                 )
                 .run_if(in_state(GameState::Playing)),
             );

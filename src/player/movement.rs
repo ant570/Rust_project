@@ -4,7 +4,7 @@ use crate::player::player::Control;
 use crate::player::player::Player;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
-use crate::scenes::menu::settings::AudioSettings;
+use crate::scenes::menu::settings::Settings;
 use bevy::time::Time;
 use crate::scenes::menu::settings::AudioSettingType;
 use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
@@ -16,7 +16,7 @@ pub fn keyboard_input(
     time: Res<Time>,
     audio_assets: Res<GameAudio>,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
-    settings: Res<AudioSettings>,
+    settings: Res<Settings>,
 ) {
     //Zakończenie gry
     if keyboard_input.just_pressed(KeyCode::Escape) {
@@ -34,7 +34,7 @@ pub fn player_movement(
     mut query: Query<(&mut Transform, &mut Player)>,
     time: Res<Time>,
     audio_assets: Res<GameAudio>,
-    settings: Res<AudioSettings>,
+    settings: Res<Settings>,
 ) {
     for (mut transform, mut player) in query.iter_mut() {
         //Sprawdzenie czy nie jest zatrzymany

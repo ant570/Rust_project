@@ -16,6 +16,7 @@ use crate::Component;
 use crate::scenes::menu::settings::AudioSettingType;
 use bevy::prelude::AudioSinkPlayback;
 use crate::Entity;
+use crate::scenes::menu::settings::Settings;
 
 #[derive(Resource)]
 
@@ -63,20 +64,24 @@ fn play_background_music(
     mut commands: Commands,
     audio_assets: Option<Res<GameAudio>>,
     existing_audio: Query<&AudioPlayer>,
+    settings: Res<Settings>,
 ) {
     if existing_audio.is_empty()
         && let Some(assets) = audio_assets
     {
         commands.spawn((
             AudioPlayer::new(assets.background.clone()),
-            PlaybackSettings::LOOP,
+            PlaybackSettings {
+                volume : bevy::audio::Volume::Linear(settings.music_volume),
+                ..PlaybackSettings::LOOP
+            },
             SoundType(AudioSettingType::Music),
         ));
     }
 }
 
 fn sync_volume_settings(
-    settings: Res<settings::AudioSettings>,
+    settings: Res<settings::Settings>,
     mut query: Query<(&SoundType, &mut PlaybackSettings, Option<&mut AudioSink>)>,
 ) {
     if settings.is_changed() {

@@ -5,34 +5,64 @@ use crate::scenes::menu::OnMenuScreen;
 use bevy::ui::RelativeCursorPosition;
 use crate::GameState;
 use bevy::ui::FocusPolicy;
+use bevy::ui::ZIndex;
+#[derive(Component)]
+pub struct WinScoreLabel;
 
 #[derive(Component, PartialEq)]
 pub enum SettingsButtonAction {
-   Back
+   Back,
+   Plus,
+   Minus,
+}
+
+#[derive(Component, Clone)]
+pub enum LabelType{
+    WinScore,
+    FallScore,
+    CoinScore,
+    HitScore,
+    DamageScore
 }
 
 #[derive(Resource)]
-pub struct AudioSettings {
+pub struct Settings {
     pub music_volume: f32,
     pub coin_volume: f32,
     pub jump_volume: f32,
     pub hit_volume: f32,
     pub fail_volume: f32,
     pub damage_volume: f32,
+    pub win_score: u32,
+    pub fall_score: u32,
+    pub coin_score: u32,
+    pub hit_score: u32,
+    pub damage_score: u32,
 }
 
-impl Default for AudioSettings {
+impl Default for Settings {
     fn default() -> Self {
-        AudioSettings {
+        Settings {
             music_volume: 0.5,
             coin_volume: 0.5,
             jump_volume: 0.5,
             hit_volume: 0.5,
             fail_volume: 0.5,
             damage_volume: 0.5,
+            win_score: 1000,
+            fall_score: 200,
+            coin_score: 25,
+            hit_score: 1,
+            damage_score: 10,
         }
     }
 }
+
+pub const WIN_ADD: u32 = 100;
+pub const FALL_DAMAGE_ADD: u32 = 25;
+pub const COIN_ADD: u32 = 5;
+pub const HIT_ADD: u32 = 1;
+pub const DAMAGE_ADD: u32 = 10; 
 
 #[derive(Component)]
 pub struct VolumeSlider{
@@ -109,7 +139,10 @@ pub fn spawn_volume_slider(
 }
 
 
-pub fn spawn_settings(mut commands: Commands) {
+pub fn spawn_settings(
+    mut commands: Commands,
+    settings: ResMut<Settings>,
+) {
     commands.spawn((
         OnMenuScreen,
         Node {
@@ -173,6 +206,12 @@ pub fn spawn_settings(mut commands: Commands) {
             0.5,
         );
 
+        spawn_score_label(parent, &*settings, LabelType::WinScore);
+        spawn_score_label(parent, &*settings, LabelType::FallScore);
+        spawn_score_label(parent, &*settings, LabelType::CoinScore);
+        spawn_score_label(parent, &*settings, LabelType::HitScore);
+        spawn_score_label(parent, &*settings, LabelType::DamageScore);
+
 
         parent.spawn((
             Button,
@@ -201,13 +240,103 @@ pub fn spawn_settings(mut commands: Commands) {
     
 }
 
+pub fn spawn_score_label(
+    parent: &mut ChildSpawnerCommands,
+    settings: &Settings,
+    label_type: LabelType,
+) {
+    parent.spawn(Node {
+            flex_direction: FlexDirection::Row, 
+            align_items: AlignItems::Center,
+            column_gap: Val::Px(20.0),
+            ..default()
+        }).with_children(|row| {
+            
+
+            row.spawn((
+                Button,
+                SettingsButtonAction::Minus,
+                label_type.clone(),
+                OnMenuScreen,
+                Node {
+                    width: Val::Px(50.0),
+                    height: Val::Px(50.0),
+                    margin: UiRect::all(Val::Px(10.0)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BackgroundColor(Color::from(RED)),
+            ))
+            .with_children(|btn| {
+                btn.spawn((
+                    Text::new("-"),
+                    TextFont { font_size: 50.0, ..default() },
+                    TextColor(Color::from(WHITE)),
+                ));
+            });
+            let text = match label_type {
+                LabelType::WinScore => "Win Score: ",
+                LabelType::FallScore => "Fall Damage Score: ",
+                LabelType::CoinScore => "Coin Collection Score: ",
+                LabelType::HitScore => "Hit Enemy Score: ",
+                LabelType::DamageScore => "Damage Taken Score: ",
+            };
+            row.spawn((
+                Text::new(text),
+                TextFont { font_size: 25.0, ..default() },
+                TextColor(Color::from(GOLD)),
+                
+            ));
+
+            row.spawn((
+                Text::new(match label_type {
+                    LabelType::WinScore => settings.win_score.to_string(),
+                    LabelType::FallScore => settings.fall_score.to_string(),
+                    LabelType::CoinScore => settings.coin_score.to_string(),
+                    LabelType::HitScore => settings.hit_score.to_string(),
+                    LabelType::DamageScore => settings.damage_score.to_string(),
+                }),
+                label_type.clone(),
+                TextFont { font_size: 25.0, ..default() },
+                TextColor(Color::from(GOLD)),
+                WinScoreLabel,
+            ));
+
+            row.spawn((
+                Button,
+                SettingsButtonAction::Plus,
+                OnMenuScreen,
+                label_type.clone(),
+                Node {
+                    width: Val::Px(50.0),
+                    height: Val::Px(50.0),
+                    margin: UiRect::all(Val::Px(10.0)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BackgroundColor(Color::from(GREEN)),
+            ))
+            .with_children(|btn| {
+                btn.spawn((
+                    Text::new("+"),
+                    TextFont { font_size: 50.0, ..default() },
+                    TextColor(Color::from(WHITE)),
+                ));
+            });
+        });
+}
+
 pub fn settings_action(
-    mut settings: ResMut<AudioSettings>,
+    mut settings: ResMut<Settings>,
     interaction_query: Query<(&Interaction, &RelativeCursorPosition, &VolumeSlider, &Children)>,
     mut handle_query: Query<&mut Node, With<SliderHandle>>,
-    button_query: Query<(&Interaction, &SettingsButtonAction), (Changed<Interaction>, With<Button>)>,
+    button_label_query: Query<(&Interaction, &SettingsButtonAction, &LabelType), (Changed<Interaction>, With<Button>)>,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     current_state: Res<State<crate::scenes::game_state::GameState>>,
+    mut label_query: Query<(&mut Text, &LabelType)>,
+    button_query: Query<(&Interaction, &SettingsButtonAction), (Changed<Interaction>, With<Button>)>,
 ) {
     for (interaction, cursor_pos, slider, children) in &interaction_query {
         if *interaction == Interaction::Pressed {
@@ -233,21 +362,66 @@ pub fn settings_action(
         }
     }
 
-    for (interaction, action) in &button_query {
-        if *interaction == Interaction::Pressed && *action == SettingsButtonAction::Back {
-            match current_state.get() { 
-                GameState::SettingsStart => {
-                    if *action == SettingsButtonAction::Back {
-                        next_state.set(GameState::StartMenu);
+    for (interaction, action, label_type) in &button_label_query {
+        if *interaction == Interaction::Pressed {
+            match action {
+                SettingsButtonAction::Plus => {
+                    println!("Huhu");
+                    match label_type {
+                        LabelType::WinScore => settings.win_score = settings.win_score.saturating_add(WIN_ADD),
+                        LabelType::FallScore => settings.fall_score = settings.fall_score.saturating_add(FALL_DAMAGE_ADD),
+                        LabelType::CoinScore => settings.coin_score = settings.coin_score.saturating_add(COIN_ADD),
+                        LabelType::HitScore => settings.hit_score = settings.hit_score.saturating_add(HIT_ADD),
+                        LabelType::DamageScore => settings.damage_score = settings.damage_score.saturating_add(DAMAGE_ADD),
+                    }
+                    println!("Win score increased to {}", settings.win_score);
+                    for (mut text, label_type) in &mut label_query {
+                        match label_type {
+                            LabelType::WinScore => text.0 = settings.win_score.to_string(),
+                            LabelType::FallScore => text.0 = settings.fall_score.to_string(),
+                            LabelType::CoinScore => text.0 = settings.coin_score.to_string(),
+                            LabelType::HitScore => text.0 = settings.hit_score.to_string(),
+                            LabelType::DamageScore => text.0 = settings.damage_score.to_string(),
+                        }
                     }
                 }
-                GameState::SettingsPause => {
-                    if *action == SettingsButtonAction::Back {
-                        next_state.set(GameState::Paused);
+                SettingsButtonAction::Minus => {
+                    match label_type {
+                        LabelType::WinScore => settings.win_score = settings.win_score.saturating_sub(WIN_ADD),
+                        LabelType::FallScore => settings.fall_score = settings.fall_score.saturating_sub(FALL_DAMAGE_ADD),
+                        LabelType::CoinScore => settings.coin_score = settings.coin_score.saturating_sub(COIN_ADD),
+                        LabelType::HitScore => settings.hit_score = settings.hit_score.saturating_sub(HIT_ADD),
+                        LabelType::DamageScore => settings.damage_score = settings.damage_score.saturating_sub(DAMAGE_ADD),
+                    }
+                    for (mut text, label_type) in &mut label_query {
+                        match label_type {
+                            LabelType::WinScore => text.0 = settings.win_score.to_string(),
+                            LabelType::FallScore => text.0 = settings.fall_score.to_string(),
+                            LabelType::CoinScore => text.0 = settings.coin_score.to_string(),
+                            LabelType::HitScore => text.0 = settings.hit_score.to_string(),
+                            LabelType::DamageScore => text.0 = settings.damage_score.to_string(),
+                        }
                     }
                 }
+                
                 _ => {}
             }
         }
-    }       
+    }
+
+    for (interaction, action) in &button_query {
+        if *interaction == Interaction::Pressed {
+            if let SettingsButtonAction::Back = action {
+                match current_state.get() {
+                    GameState::SettingsStart => {
+                        next_state.set(GameState::StartMenu);
+                    }
+                    GameState::SettingsPause => {
+                        next_state.set(GameState::Paused);
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }      
 }

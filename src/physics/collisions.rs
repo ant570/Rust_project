@@ -5,7 +5,7 @@ use crate::scenes::world::coin::Coin;
 use crate::scenes::world::spawn::{Tile, TileType};
 use bevy::prelude::*;
 use crate::scenes::menu::settings::AudioSettingType;
-use crate::scenes::menu::settings::AudioSettings;
+use crate::scenes::menu::settings::Settings;
 use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
 pub const MAX_COLLISION_PUSH: f32 = 30.0;
 
@@ -124,12 +124,11 @@ pub fn player_with_player(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &Collider, &mut Player)>,
     audio_assets: Res<GameAudio>,
-    settings: Res<AudioSettings>,
+    settings: Res<Settings>,
 ) {
     let mut data_vector: Vec<(Entity, f32, f32)> = Vec::new();
     let mut combinations = query.iter_combinations_mut();
 
-    // 2. Używamy pętli while, aby bezpiecznie pobierać kolejne pary
     while let Some([player1, player2]) = combinations.fetch_next() {
         let (entity_id1, transform1, collider1, mut player1_component) = player1;
         let (entity_id2, transform2, collider2, mut player2_component) = player2;
@@ -149,8 +148,8 @@ pub fn player_with_player(
                     },
                     SoundType(AudioSettingType::Damage),
                 ));
-                player1_component.points += 1;
-                player2_component.points += 1;
+                player1_component.points += settings.hit_score;
+                player2_component.points += settings.hit_score;
                 //x collisions
                 let distance = details[0];
                 if distance > 0.0 {
@@ -180,11 +179,11 @@ pub fn player_with_player(
 
                     player1_component.y_move = 0.0;
                     if player1_component.jump {
-                        player2_component.points += 5;
+                        player2_component.points += settings.damage_score;
                     } else if player2_component.jump {
-                        player1_component.points += 5;
+                        player1_component.points += settings.damage_score;
                     } else {
-                        player2_component.points += 5;
+                        player2_component.points += settings.damage_score;
                     }
 
                     //ToDo
@@ -208,11 +207,11 @@ pub fn player_with_player(
                     player2_component.y_move = 0.0;
 
                     if player2_component.jump {
-                        player1_component.points += 5;
+                        player1_component.points += settings.damage_score;
                     } else if player1_component.jump {
-                        player2_component.points += 5;
+                        player2_component.points += settings.damage_score;
                     } else {
-                        player1_component.points += 5;
+                        player1_component.points += settings.damage_score;
                     }
 
                     //ToDo
@@ -227,7 +226,6 @@ pub fn player_with_player(
     }
     for (entity, x, y) in data_vector.iter_mut() {
         if let Ok((_entity_pom, mut transform, _collider, _player_comp)) = query.get_mut(*entity) {
-            // Zmień pozycję gracza
             transform.translation.x += *x;
             transform.translation.y += *y;
         }
@@ -239,7 +237,7 @@ pub fn player_with_coin_collision_system(
     mut player_query: Query<(&Transform, &mut Player, &Sprite)>,
     coin_query: Query<(Entity, &Transform, &Sprite, &Coin)>,
     audio_assets: Res<GameAudio>,
-    settings: Res<AudioSettings>
+    settings: Res<Settings>
 ) {
     for (player_transform, mut player, player_sprite) in &mut player_query {
         let player_pos = player_transform.translation.truncate();
@@ -258,7 +256,7 @@ pub fn player_with_coin_collision_system(
                     },
                     SoundType(AudioSettingType::Coin),
                 ));
-                player.points += 25; // Dodawanie punktów
+                player.points += settings.coin_score; // Dodawanie punktów
                 commands.entity(coin_entity).despawn(); // usuwanie monety
             } 
         }

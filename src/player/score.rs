@@ -14,3 +14,15 @@ pub fn update_score_text(
         }
     }
 }
+
+pub fn check_win_condition(
+    player_query: Query<&Player>,
+    settings: Res<crate::scenes::menu::settings::Settings>,
+    mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
+) {
+    for player in player_query.iter() {
+        if player.points >= settings.win_score {
+            next_state.set(crate::scenes::game_state::GameState::Finished);
+        }
+    }
+}

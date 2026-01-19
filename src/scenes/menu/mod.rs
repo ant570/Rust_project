@@ -52,7 +52,7 @@ impl Plugin for MenuPlugin{
         .add_systems(OnEnter(GameState::SettingsPause), spawn_settings)
         .add_systems(Update, settings::settings_action.run_if(in_state(GameState::SettingsPause)))
         .add_systems(OnExit(GameState::SettingsPause), cleanup_menu)
-        .init_resource::<settings::AudioSettings>()
+        .init_resource::<settings::Settings>()
         .add_systems(Update, settings::settings_action.run_if(
             in_state(GameState::SettingsStart)
             .or(in_state(GameState::SettingsPause))
