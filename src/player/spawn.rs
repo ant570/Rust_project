@@ -1,5 +1,3 @@
-use std::os::linux::fs;
-
 use crate::audio::GameAudio;
 use crate::player::attack::{AttackState, STICK_BASE_RANGE, STICK_THICKNESS, Stick};
 use crate::player::player::Control;

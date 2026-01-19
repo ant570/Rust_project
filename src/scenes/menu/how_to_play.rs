@@ -69,7 +69,30 @@ pub fn spawn_htp(mut commands: Commands) {
                 TextColor(Color::WHITE),
             ));
         }
-
+        parent.spawn((
+            Text::new("Task: Collect coins and avoid damage!"),
+            TextFont { font_size: 20.0, ..default() },
+            TextColor(Color::from(GOLD)),
+            Node { margin: UiRect::top(Val::Px(40.0)), ..default() },
+        ));
+        parent.spawn((
+            Text::new("First to reach the win score wins."),
+            TextFont { font_size: 20.0, ..default() },
+            TextColor(Color::from(GOLD)),
+            Node { margin: UiRect::top(Val::Px(40.0)), ..default() },
+        ));
+        parent.spawn((
+            Text::new("You can gain points by collecting coins and hitting the opponent."),
+            TextFont { font_size: 20.0, ..default() },
+            TextColor(Color::from(GOLD)),
+            Node { margin: UiRect::top(Val::Px(40.0)), ..default() },
+        ));
+        parent.spawn((
+            Text::new("You can set the win score and scoring rules in Settings."),
+            TextFont { font_size: 20.0, ..default() },
+            TextColor(Color::from(GOLD)),
+            Node { margin: UiRect::top(Val::Px(40.0)), ..default() },
+        ));
         parent.spawn((
             Text::new("ESC - Pause / Back to Menu"),
             TextFont { font_size: 20.0, ..default() },

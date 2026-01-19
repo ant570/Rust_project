@@ -141,7 +141,7 @@ pub fn spawn_volume_slider(
 
 pub fn spawn_settings(
     mut commands: Commands,
-    mut settings: ResMut<Settings>,
+    settings: ResMut<Settings>,
 ) {
     commands.spawn((
         OnMenuScreen,
