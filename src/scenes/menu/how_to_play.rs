@@ -3,6 +3,13 @@ use crate::scenes::menu::OnMenuScreen;
 use bevy::color::palettes::css::*;
 use bevy::prelude::*;
 
+type HtpInteractionQuery<'w, 's> = Query<
+    'w,
+    's,
+    (&'static Interaction, &'static MenuHtpButtonAction),
+    (Changed<Interaction>, With<Button>),
+>;
+
 #[derive(Component, PartialEq, Eq)]
 pub enum MenuHtpButtonAction {
     Back,
@@ -175,10 +182,7 @@ pub fn spawn_htp(mut commands: Commands) {
 }
 
 pub fn htp_action(
-    interaction_query: Query<
-        (&Interaction, &MenuHtpButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
+    interaction_query: HtpInteractionQuery,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     current_state: Res<State<crate::scenes::game_state::GameState>>,
 ) {

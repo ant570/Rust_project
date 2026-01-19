@@ -3,6 +3,13 @@ use bevy::app::AppExit;
 use bevy::color::palettes::css::*;
 use bevy::prelude::*;
 
+type StartInteractionQuery<'w, 's> = Query<
+    'w,
+    's,
+    (&'static Interaction, &'static MenuButtonAction),
+    (Changed<Interaction>, With<Button>),
+>;
+
 #[derive(Component)]
 pub enum MenuButtonAction {
     Play,
@@ -78,10 +85,7 @@ pub fn start_menu(mut commands: Commands) {
 }
 
 pub fn menu_action(
-    interaction_query: Query<
-        (&Interaction, &MenuButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
+    interaction_query: StartInteractionQuery,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     mut exit: MessageWriter<AppExit>,
 ) {

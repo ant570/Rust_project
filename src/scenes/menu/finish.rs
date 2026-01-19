@@ -5,6 +5,16 @@ use crate::scenes::menu::OnMenuScreen;
 use bevy::color::palettes::css::*;
 use bevy::prelude::*;
 
+type FinishInteractionQuery<'w, 's> = Query<
+    'w,
+    's,
+    (&'static Interaction, &'static FinishMenuButtonAction),
+    (Changed<Interaction>, With<Button>),
+>;
+
+type WorldEntitiesQuery<'w, 's> =
+    Query<'w, 's, Entity, (Without<Camera>, Without<DirectionalLight>, Without<Window>)>;
+
 #[derive(Component)]
 pub enum FinishMenuButtonAction {
     Restart,
@@ -165,14 +175,11 @@ pub fn spawn_finish_menu(
 }
 
 pub fn finish_menu_action(
-    interaction_query: Query<
-        (&Interaction, &FinishMenuButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
+    interaction_query: FinishInteractionQuery,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     mut exit: MessageWriter<AppExit>,
     mut commands: Commands,
-    query: Query<Entity, (Without<Camera>, Without<DirectionalLight>, Without<Window>)>,
+    query: WorldEntitiesQuery,
 ) {
     for (interaction, action) in interaction_query {
         if *interaction == Interaction::Pressed {

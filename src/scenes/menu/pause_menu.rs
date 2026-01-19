@@ -3,6 +3,16 @@ use bevy::app::AppExit;
 use bevy::color::palettes::css::*;
 use bevy::prelude::*;
 
+type PauseInteractionQuery<'w, 's> = Query<
+    'w,
+    's,
+    (&'static Interaction, &'static MenuButtonAction),
+    (Changed<Interaction>, With<Button>),
+>;
+
+type WorldEntitiesQuery<'w, 's> =
+    Query<'w, 's, Entity, (Without<Camera>, Without<DirectionalLight>, Without<Window>)>;
+
 #[derive(Component)]
 pub enum MenuButtonAction {
     Continue,
@@ -82,14 +92,11 @@ pub fn pause_menu(mut commands: Commands) {
 }
 
 pub fn pause_menu_action(
-    interaction_query: Query<
-        (&Interaction, &MenuButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
+    interaction_query: PauseInteractionQuery,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     mut exit: MessageWriter<AppExit>,
     mut commands: Commands,
-    query: Query<Entity, (Without<Camera>, Without<DirectionalLight>, Without<Window>)>,
+    query: WorldEntitiesQuery,
 ) {
     for (interaction, action) in &interaction_query {
         if *interaction == Interaction::Pressed {
