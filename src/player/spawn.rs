@@ -1,3 +1,5 @@
+use std::os::linux::fs;
+
 use crate::audio::GameAudio;
 use crate::player::attack::{AttackState, STICK_BASE_RANGE, STICK_THICKNESS, Stick};
 use crate::player::player::Control;
@@ -169,7 +171,7 @@ pub fn check_player_fall(
             player.jump = false;
             player.y_move = 0.0;
         } else {
-            player.points += 500;
+            player.points += settings.fall_score;
         }
     }
 }
