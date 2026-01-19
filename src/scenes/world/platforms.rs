@@ -56,7 +56,7 @@ pub fn move_platforms_system(
         transform.translation.y -= PLATFORM_BASE_FALL_SPEED * mover.fall_factor * dt;
 
         if transform.translation.y < DESPAWN_Y {
-            commands.entity(entity).despawn();
+            commands.entity(entity).try_despawn();
         }
     }
 }

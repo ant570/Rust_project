@@ -252,7 +252,7 @@ pub fn player_with_coin_collision_system(
                 ));
 
                 player.points += settings.coin_score;
-                commands.entity(coin_entity).despawn();
+                commands.entity(coin_entity).try_despawn();
             }
         }
     }

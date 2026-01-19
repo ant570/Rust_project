@@ -186,7 +186,7 @@ pub fn finish_menu_action(
             match action {
                 FinishMenuButtonAction::Restart => {
                     for entity in &query {
-                        commands.entity(entity).despawn();
+                        commands.entity(entity).try_despawn();
                     }
                     next_state.set(GameState::StartMenu);
                 }

@@ -109,7 +109,7 @@ pub fn pause_menu_action(
                 }
                 MenuButtonAction::Restart => {
                     for entity in &query {
-                        commands.entity(entity).despawn();
+                        commands.entity(entity).try_despawn();
                     }
                     next_state.set(crate::scenes::game_state::GameState::StartMenu);
                 }

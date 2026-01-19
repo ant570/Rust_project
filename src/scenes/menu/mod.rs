@@ -16,7 +16,7 @@ pub struct MenuPlugin;
 pub struct OnMenuScreen;
 pub fn cleanup_menu(mut commands: Commands, query: Query<Entity, With<OnMenuScreen>>) {
     for entity in &query {
-        commands.entity(entity).despawn();
+        commands.entity(entity).try_despawn();
     }
 }
 

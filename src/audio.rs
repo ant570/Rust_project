@@ -113,7 +113,7 @@ pub fn cleanup_audio_flood(
 ) {
     for (entity, sink, sound_type) in &query {
         if sound_type.0 != AudioSettingType::Music && sink.empty() {
-            commands.entity(entity).despawn();
+            commands.entity(entity).try_despawn();
         }
     }
 }
