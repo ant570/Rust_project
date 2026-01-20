@@ -100,7 +100,7 @@ pub fn menu_action(
                     next_state.set(crate::scenes::game_state::GameState::Playing);
                 }
                 MenuButtonAction::HowToPlay => {
-                    next_state.set(crate::scenes::game_state::GameState::HowToPlay2);
+                    next_state.set(crate::scenes::game_state::GameState::HowToPlay1);
                 }
                 MenuButtonAction::Settings => {
                     next_state.set(crate::scenes::game_state::GameState::SettingsStart);
