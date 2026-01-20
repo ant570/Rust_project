@@ -122,6 +122,58 @@ pub fn player_with_tile_collision_system(
     }
 }
 
+fn resolve_player_vs_tiles_step(
+    player_transform: &mut Transform,
+    player_collider: &Collider,
+    player: &mut Player,
+    tile_query: &Query<(&Transform, &Tile), Without<Player>>,
+) {
+    let mut player_pos = player_transform.translation.truncate();
+    let player_size = player_collider.half_size * 2.0;
+
+    for (tile_transform, tile) in tile_query.iter() {
+        let tile_pos = tile_transform.translation.truncate();
+        let tile_size = tile.size;
+
+        if !aabb_collision(player_pos, player_size, tile_pos, tile_size) {
+            continue;
+        }
+
+        let delta = player_pos - tile_pos;
+        let combined_half = (player_size + tile_size) / 2.0;
+
+        match tile.kind {
+            TileType::Wall => {
+                let overlap_x = combined_half.x - delta.x.abs();
+                if overlap_x > 0.0 {
+                    let push = overlap_x;
+                    if delta.x > 0.0 {
+                        player_pos.x += push;
+                    } else {
+                        player_pos.x -= push;
+                    }
+                }
+            }
+
+            TileType::Ground | TileType::Platform => {
+                let overlap_y = combined_half.y - delta.y.abs();
+                if overlap_y > 0.0 {
+                    let push = overlap_y;
+                    if delta.y > 0.0 {
+                        player_pos.y += push;
+                    } else {
+                        player.y_move = 0.0;
+                        player_pos.y -= push;
+                    }
+                }
+            }
+        }
+    }
+
+    player_transform.translation.x = player_pos.x;
+    player_transform.translation.y = player_pos.y;
+}
+
 fn intersects(a: &Rect, b: &Rect) -> bool {
     a.min.x < b.max.x && a.max.x > b.min.x && a.min.y < b.max.y && a.max.y > b.min.y
 }
@@ -129,6 +181,7 @@ fn intersects(a: &Rect, b: &Rect) -> bool {
 pub fn player_with_player(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &Collider, &mut Player)>,
+    tile_query: Query<(&Transform, &Tile), Without<Player>>,
     audio_assets: Res<GameAudio>,
     settings: Res<Settings>,
 ) {
@@ -208,9 +261,9 @@ pub fn player_with_player(
         }
     }
 
-    // Apply pushes in small steps to reduce tunneling through tiles (not working)
+    // Apply pushes in small steps AND resolve tiles each step
     for (entity, x, y) in pushes {
-        if let Ok((_e, mut transform, _collider, _player)) = query.get_mut(entity) {
+        if let Ok((_e, mut transform, collider, mut player)) = query.get_mut(entity) {
             let steps_i32 = PUSH_SUBSTEPS.max(1);
             let steps_f32 = steps_i32 as f32;
 
@@ -220,6 +273,8 @@ pub fn player_with_player(
             for _ in 0..steps_i32 {
                 transform.translation.x += sx;
                 transform.translation.y += sy;
+
+                resolve_player_vs_tiles_step(&mut transform, collider, &mut player, &tile_query);
             }
         }
     }
