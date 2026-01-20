@@ -7,7 +7,7 @@ use crate::scenes::world::spawn::{Tile, TileType};
 use bevy::audio::{AudioPlayer, PlaybackMode, PlaybackSettings};
 use bevy::prelude::*;
 
-pub const MAX_COLLISION_PUSH: f32 = 30.0;
+pub const MAX_COLLISION_PUSH: f32 = 50.0;
 pub const PLAYER_KNOCKBACK_MULT: f32 = 4.0;
 pub const PUSH_SUBSTEPS: i32 = 10;
 
@@ -210,7 +210,7 @@ pub fn player_with_player(
                     volume: bevy::audio::Volume::Linear(settings.hit_volume),
                     ..PlaybackSettings::ONCE
                 },
-                SoundType(AudioSettingType::Damage),
+                SoundType(AudioSettingType::Hit),
             ));
 
             p1.points += settings.hit_score;
