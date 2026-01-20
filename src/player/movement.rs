@@ -101,7 +101,6 @@ pub fn player_movement(
                         },
                         SoundType(AudioSettingType::Jump),
                     ));
-                    println!("{}", player.jump_speed);
                     player.y_move += player.jump_height;
                     player.jump = false;
                 }
