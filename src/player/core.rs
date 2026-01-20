@@ -1,6 +1,7 @@
 use crate::player::position::Position2;
 use bevy::prelude::*;
 
+//Typy sterowania
 pub enum Control {
     Wasd,
     Arrows,

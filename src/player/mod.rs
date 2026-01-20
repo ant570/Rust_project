@@ -14,6 +14,7 @@ impl Plugin for PlatformerGamePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             OnTransition {
+                //tylko podczas startu rozgrywki
                 exited: GameState::StartMenu,
                 entered: GameState::Playing,
             },
@@ -28,7 +29,7 @@ impl Plugin for PlatformerGamePlugin {
                 score::update_score_text,
                 score::check_win_condition,
             )
-                .run_if(in_state(GameState::Playing)),
+                .run_if(in_state(GameState::Playing)), //tylko podczas gry
         );
     }
 }

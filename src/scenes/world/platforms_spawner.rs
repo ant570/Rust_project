@@ -18,6 +18,7 @@ pub fn setup_platform_spawner(mut commands: Commands) {
     )));
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn platform_spawner_system(
     time: Res<Time>,
     mut timer: ResMut<PlatformSpawnTimer>,

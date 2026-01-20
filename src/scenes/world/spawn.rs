@@ -111,6 +111,8 @@ pub fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>) {
 
             if col == 0 || col == GRID_COLS - 1 {
                 spawn_type = Some(TileType::Wall);
+            } else if row == GRID_ROWS - 1 {
+                spawn_type = Some(TileType::Ground);
             } else if row == 0 {
                 if bottom_presence[col as usize] {
                     spawn_type = Some(TileType::Ground);

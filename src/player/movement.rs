@@ -89,8 +89,9 @@ pub fn player_movement(
                     movement_x = -time.delta_secs();
                 }
 
-                //Movement y
+                //Jump
                 if keyboard_input.just_pressed(KeyCode::ArrowUp) && player.jump {
+                    //tylko gdy stoi na ziemi
                     commands.spawn((
                         AudioPlayer::new(audio_assets.jump.clone()),
                         PlaybackSettings {
@@ -100,12 +101,13 @@ pub fn player_movement(
                         },
                         SoundType(AudioSettingType::Jump),
                     ));
-                    println!("{}", player.jump_speed);
                     player.y_move += player.jump_height;
                     player.jump = false;
                 }
             }
         }
+
+        //movement y
         if player.y_move > 0.0 {
             movement_y = f32::min(player.y_move, time.delta_secs() * player.jump_speed);
             player.y_move -= movement_y;
@@ -113,8 +115,8 @@ pub fn player_movement(
 
         player.pos.x += movement_x * player.speed_x;
         transform.translation.x += movement_x * player.speed_x;
-        movement_y -= player.gravity;
+        movement_y -= time.delta_secs() * player.gravity; //grawitacja
         transform.translation.y += movement_y;
-        player.pos.y += movement_y; //grawitacja
+        player.pos.y += movement_y;
     }
 }

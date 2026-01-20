@@ -13,10 +13,12 @@ pub mod start_menu;
 
 pub struct MenuPlugin;
 #[derive(Component)]
-pub struct OnMenuScreen;
+pub struct OnMenuScreen; //Znacznik dla obiektów menu
+
+//Funkcja usuwająca wszystkie obiekty menu (posiadające struct OnMenuScreen)
 pub fn cleanup_menu(mut commands: Commands, query: Query<Entity, With<OnMenuScreen>>) {
     for entity in &query {
-        commands.entity(entity).despawn();
+        commands.entity(entity).try_despawn();
     }
 }
 

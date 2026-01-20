@@ -18,7 +18,7 @@ impl Plugin for PlatformerGamePlugin {
                     exited: GameState::StartMenu,
                     entered: GameState::Playing,
                 },
-                (spawn::spawn_map, platforms_spawner::setup_platform_spawner),
+                (spawn::spawn_map, platforms_spawner::setup_platform_spawner), //tylko przy wejściu do gry
             )
             .add_systems(
                 Update,
@@ -27,7 +27,7 @@ impl Plugin for PlatformerGamePlugin {
                     platforms_spawner::platform_spawner_system,
                     coin::animate_coins,
                 )
-                    .run_if(in_state(crate::scenes::game_state::GameState::Playing)),
+                    .run_if(in_state(crate::scenes::game_state::GameState::Playing)), //tylko podczas gry
             );
     }
 }

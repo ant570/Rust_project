@@ -3,6 +3,14 @@ use bevy::app::AppExit;
 use bevy::color::palettes::css::*;
 use bevy::prelude::*;
 
+type StartInteractionQuery<'w, 's> = Query<
+    'w,
+    's,
+    (&'static Interaction, &'static MenuButtonAction),
+    (Changed<Interaction>, With<Button>),
+>;
+
+//Typy przycisków
 #[derive(Component)]
 pub enum MenuButtonAction {
     Play,
@@ -38,6 +46,8 @@ pub fn start_menu(mut commands: Commands) {
                     ..default()
                 },
             ));
+
+            //Spawn przycisków menu
             let button_labels = [
                 ("START", MenuButtonAction::Play),
                 ("HOW TO PLAY", MenuButtonAction::HowToPlay),
@@ -77,11 +87,9 @@ pub fn start_menu(mut commands: Commands) {
         });
 }
 
+//Obsługa przycisków
 pub fn menu_action(
-    interaction_query: Query<
-        (&Interaction, &MenuButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
+    interaction_query: StartInteractionQuery,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     mut exit: MessageWriter<AppExit>,
 ) {

@@ -3,11 +3,19 @@ use crate::scenes::menu::OnMenuScreen;
 use bevy::color::palettes::css::*;
 use bevy::prelude::*;
 
+type HtpInteractionQuery<'w, 's> = Query<
+    'w,
+    's,
+    (&'static Interaction, &'static MenuHtpButtonAction),
+    (Changed<Interaction>, With<Button>),
+>;
+
+//Typy przycisków
 #[derive(Component, PartialEq, Eq)]
 pub enum MenuHtpButtonAction {
     Back,
 }
-
+//htp = how to play
 pub fn spawn_htp(mut commands: Commands) {
     commands
         .spawn((
@@ -175,13 +183,11 @@ pub fn spawn_htp(mut commands: Commands) {
 }
 
 pub fn htp_action(
-    interaction_query: Query<
-        (&Interaction, &MenuHtpButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
+    interaction_query: HtpInteractionQuery,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     current_state: Res<State<crate::scenes::game_state::GameState>>,
 ) {
+    //obsługa przycisku back w zależności od stanu gry (z którego menu zostało wywołane)
     for (interaction, action) in &interaction_query {
         if *interaction == Interaction::Pressed && *action == MenuHtpButtonAction::Back {
             match current_state.get() {

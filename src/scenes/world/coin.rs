@@ -7,6 +7,7 @@ pub struct AnimationConfig {
     pub frame_timer: Timer,
     pub total_frames: usize,
 }
+//Struktura do oznaczania monet
 #[derive(Component)]
 pub struct Coin;
 
@@ -26,14 +27,16 @@ pub fn spawn_coin_on_platform(
     position: Vec3,
     mover: PlatformMover,
 ) {
+    //Wczytywanie tekstury
     let columns = 5;
     let rows = 2;
     let frame_size = UVec2::new(200, 200);
 
     let layout = TextureAtlasLayout::from_grid(frame_size, columns, rows, None, None);
-
     let texture_handle = asset_server.load("others/coin.png");
     let layout_handle = texture_atlas_layouts.add(layout);
+
+    //Spawn monety
     commands.spawn((
         Sprite {
             image: texture_handle,
@@ -51,9 +54,12 @@ pub fn spawn_coin_on_platform(
     ));
 }
 
+//Animacja monet
 pub fn animate_coins(time: Res<Time>, mut query: Query<(&mut AnimationConfig, &mut Sprite)>) {
     for (mut config, mut sprite) in query.iter_mut() {
         config.frame_timer.tick(time.delta());
+
+        //Zmiana klatki animacji
         if config.frame_timer.just_finished()
             && let Some(ref mut atlas) = sprite.texture_atlas
         {

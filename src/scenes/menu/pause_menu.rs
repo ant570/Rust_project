@@ -3,6 +3,17 @@ use bevy::app::AppExit;
 use bevy::color::palettes::css::*;
 use bevy::prelude::*;
 
+type PauseInteractionQuery<'w, 's> = Query<
+    'w,
+    's,
+    (&'static Interaction, &'static MenuButtonAction),
+    (Changed<Interaction>, With<Button>),
+>;
+
+type WorldEntitiesQuery<'w, 's> =
+    Query<'w, 's, Entity, (Without<Camera>, Without<DirectionalLight>, Without<Window>)>;
+
+//Typy przycisków
 #[derive(Component)]
 pub enum MenuButtonAction {
     Continue,
@@ -13,6 +24,7 @@ pub enum MenuButtonAction {
     Exit,
 }
 
+//Menu pauzy
 pub fn pause_menu(mut commands: Commands) {
     commands
         .spawn((
@@ -49,6 +61,7 @@ pub fn pause_menu(mut commands: Commands) {
                 ("EXIT", MenuButtonAction::Exit),
             ];
 
+            //spawnowanie przycisków
             for (label, action) in button_labels {
                 parent
                     .spawn((
@@ -82,15 +95,13 @@ pub fn pause_menu(mut commands: Commands) {
 }
 
 pub fn pause_menu_action(
-    interaction_query: Query<
-        (&Interaction, &MenuButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
+    interaction_query: PauseInteractionQuery,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     mut exit: MessageWriter<AppExit>,
     mut commands: Commands,
-    query: Query<Entity, (Without<Camera>, Without<DirectionalLight>, Without<Window>)>,
+    query: WorldEntitiesQuery,
 ) {
+    //obsługa przycisków
     for (interaction, action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match action {
@@ -102,7 +113,7 @@ pub fn pause_menu_action(
                 }
                 MenuButtonAction::Restart => {
                     for entity in &query {
-                        commands.entity(entity).despawn();
+                        commands.entity(entity).try_despawn();
                     }
                     next_state.set(crate::scenes::game_state::GameState::StartMenu);
                 }

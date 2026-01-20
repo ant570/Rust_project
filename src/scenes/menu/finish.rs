@@ -5,26 +5,40 @@ use crate::scenes::menu::OnMenuScreen;
 use bevy::color::palettes::css::*;
 use bevy::prelude::*;
 
+type FinishInteractionQuery<'w, 's> = Query<
+    'w,
+    's,
+    (&'static Interaction, &'static FinishMenuButtonAction),
+    (Changed<Interaction>, With<Button>),
+>;
+
+type WorldEntitiesQuery<'w, 's> =
+    Query<'w, 's, Entity, (Without<Camera>, Without<DirectionalLight>, Without<Window>)>;
+
 #[derive(Component)]
+//Typy przycisków
 pub enum FinishMenuButtonAction {
     Restart,
     Exit,
 }
 
+//Menu zakończenia gry
 pub fn spawn_finish_menu(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     players_query: Query<&Player>,
 ) {
+    //Pobranie punktów graczy
     let mut p1_points = 0;
     let mut p2_points = 0;
-
     for player in &players_query {
         match player.control {
             Control::Wasd => p1_points = player.points,
             Control::Arrows => p2_points = player.points,
         }
     }
+
+    //Spawn menu końcowego
     commands
         .spawn((
             OnMenuScreen,
@@ -39,7 +53,7 @@ pub fn spawn_finish_menu(
             BackgroundColor(Color::from(BLACK)),
         ))
         .with_children(|parent| {
-            // lewy gracz
+            // lewy gracz (lewa strona)
             parent
                 .spawn(Node {
                     flex_direction: FlexDirection::Column,
@@ -55,6 +69,7 @@ pub fn spawn_finish_menu(
                             ..default()
                         },
                     ));
+                    //spawn punktów
                     p1.spawn((
                         Text::new(format!("SCORE: {}", p1_points)),
                         TextFont {
@@ -69,7 +84,7 @@ pub fn spawn_finish_menu(
                     ));
                 });
 
-            // 1. Twoja logika werdyktu
+            // (środek) - ogłoszenie zwycięzcy
             let winner = if p1_points > p2_points {
                 "LEFT PLAYER WINS!"
             } else if p2_points > p1_points {
@@ -98,6 +113,7 @@ pub fn spawn_finish_menu(
                         },
                     ));
 
+                    //spawn przycisków
                     let buttons = [
                         ("MAIN MENU", FinishMenuButtonAction::Restart),
                         ("EXIT", FinishMenuButtonAction::Exit),
@@ -108,7 +124,7 @@ pub fn spawn_finish_menu(
                             Button,
                             action,
                             Node {
-                                width: Val::Px(500.0), // Zmniejszona szerokość środka
+                                width: Val::Px(500.0),
                                 height: Val::Px(80.0),
                                 margin: UiRect::vertical(Val::Px(20.0)),
                                 justify_content: JustifyContent::Center,
@@ -148,6 +164,8 @@ pub fn spawn_finish_menu(
                             ..default()
                         },
                     ));
+
+                    //spawn punktów
                     p2.spawn((
                         Text::new(format!("SCORE: {}", p2_points)),
                         TextFont {
@@ -165,21 +183,19 @@ pub fn spawn_finish_menu(
 }
 
 pub fn finish_menu_action(
-    interaction_query: Query<
-        (&Interaction, &FinishMenuButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
+    interaction_query: FinishInteractionQuery,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,
     mut exit: MessageWriter<AppExit>,
     mut commands: Commands,
-    query: Query<Entity, (Without<Camera>, Without<DirectionalLight>, Without<Window>)>,
+    query: WorldEntitiesQuery,
 ) {
     for (interaction, action) in interaction_query {
         if *interaction == Interaction::Pressed {
             match action {
                 FinishMenuButtonAction::Restart => {
+                    //usunięcie wszystkich obiektów z gry
                     for entity in &query {
-                        commands.entity(entity).despawn();
+                        commands.entity(entity).try_despawn();
                     }
                     next_state.set(GameState::StartMenu);
                 }
