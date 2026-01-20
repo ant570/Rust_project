@@ -55,6 +55,7 @@ pub struct SettingsUiQuery<'w, 's> {
 #[derive(Component)]
 pub struct WinScoreLabel;
 
+//Typy przycisków
 #[derive(Component, PartialEq)]
 pub enum SettingsButtonAction {
     Back,
@@ -62,6 +63,7 @@ pub enum SettingsButtonAction {
     Minus,
 }
 
+//Typy wyświetlanych ustawień punktacji
 #[derive(Component, Clone)]
 pub enum ScoreLabel {
     Win,
@@ -71,6 +73,7 @@ pub enum ScoreLabel {
     Damage,
 }
 
+//Ustawienia gry, które można edytować w menu ustawień
 #[derive(Resource)]
 pub struct Settings {
     pub music_volume: f32,
@@ -86,6 +89,7 @@ pub struct Settings {
     pub damage_score: u32,
 }
 
+//Domyślne ustawienia gry
 impl Default for Settings {
     fn default() -> Self {
         Settings {
@@ -104,17 +108,20 @@ impl Default for Settings {
     }
 }
 
+//Wartości dodawane lub odejmowane przy zmianie ustawień punktacji
 pub const WIN_ADD: u32 = 100;
 pub const FALL_DAMAGE_ADD: u32 = 25;
 pub const COIN_ADD: u32 = 5;
 pub const HIT_ADD: u32 = 1;
 pub const DAMAGE_ADD: u32 = 10;
 
+//Struktura suwaka głośności
 #[derive(Component)]
 pub struct VolumeSlider {
     pub setting_type: AudioSettingType,
 }
 
+//Typy ustawień dźwięku
 #[derive(PartialEq)]
 pub enum AudioSettingType {
     Music,
@@ -125,9 +132,11 @@ pub enum AudioSettingType {
     Damage,
 }
 
+//Znacznik uchwytu suwaka
 #[derive(Component)]
 pub struct SliderHandle;
 
+//Funkcja spawnowania pojedyńczego suwaka głośności
 pub fn spawn_volume_slider(
     parent: &mut ChildSpawnerCommands,
     label: &str,
@@ -145,6 +154,7 @@ pub fn spawn_volume_slider(
             ..default()
         },))
         .with_children(|slider| {
+            //spawn suwaka
             slider.spawn((
                 Text::new(label),
                 TextFont {
@@ -160,6 +170,7 @@ pub fn spawn_volume_slider(
 
             slider
                 .spawn((
+                    //spawn toru suwaka
                     Node {
                         width: Val::Px(250.0),
                         height: Val::Px(20.0),
@@ -171,6 +182,7 @@ pub fn spawn_volume_slider(
                     bevy::ui::RelativeCursorPosition::default(),
                 ))
                 .with_children(|track| {
+                    //spawn uchwytu suwaka
                     track.spawn((
                         Node {
                             width: Val::Px(20.0),
@@ -189,6 +201,7 @@ pub fn spawn_volume_slider(
         });
 }
 
+//Spawnowanie całego menu ustawień
 pub fn spawn_settings(mut commands: Commands, settings: ResMut<Settings>) {
     commands
         .spawn((
@@ -217,24 +230,22 @@ pub fn spawn_settings(mut commands: Commands, settings: ResMut<Settings>) {
                 },
             ));
 
+            //spawnowanie suwaków głośności
             spawn_volume_slider(parent, "Music Volume", AudioSettingType::Music, 0.5);
-
             spawn_volume_slider(parent, "Coin Volume", AudioSettingType::Coin, 0.5);
-
             spawn_volume_slider(parent, "Jump Volume", AudioSettingType::Jump, 0.5);
-
             spawn_volume_slider(parent, "Hit Volume", AudioSettingType::Hit, 0.5);
-
             spawn_volume_slider(parent, "Fail Volume", AudioSettingType::Fail, 0.5);
-
             spawn_volume_slider(parent, "Damage Volume", AudioSettingType::Damage, 0.5);
 
+            //spawnowanie ustawień punktacji
             spawn_score_label(parent, &settings, ScoreLabel::Win);
             spawn_score_label(parent, &settings, ScoreLabel::Fall);
             spawn_score_label(parent, &settings, ScoreLabel::Coin);
             spawn_score_label(parent, &settings, ScoreLabel::Hit);
             spawn_score_label(parent, &settings, ScoreLabel::Damage);
 
+            //Spawnowanie przyciku BACK
             parent
                 .spawn((
                     Button,
@@ -265,6 +276,7 @@ pub fn spawn_settings(mut commands: Commands, settings: ResMut<Settings>) {
         });
 }
 
+//spawnowanie pojedyńczych ustawień punktacji
 pub fn spawn_score_label(
     parent: &mut ChildSpawnerCommands,
     settings: &Settings,
@@ -278,6 +290,7 @@ pub fn spawn_score_label(
             ..default()
         })
         .with_children(|row| {
+            //przycisk minus
             row.spawn((
                 Button,
                 SettingsButtonAction::Minus,
@@ -321,6 +334,7 @@ pub fn spawn_score_label(
 
             row.spawn((
                 Text::new(match label_type {
+                    //ustawiona wartość punktacji
                     ScoreLabel::Win => settings.win_score.to_string(),
                     ScoreLabel::Fall => settings.fall_score.to_string(),
                     ScoreLabel::Coin => settings.coin_score.to_string(),
@@ -336,6 +350,7 @@ pub fn spawn_score_label(
                 WinScoreLabel,
             ));
 
+            //przycisk plus
             row.spawn((
                 Button,
                 SettingsButtonAction::Plus,
@@ -364,6 +379,7 @@ pub fn spawn_score_label(
         });
 }
 pub fn settings_action(mut ui: SettingsUiQuery) {
+    //obsługa suwaków
     for (interaction, cursor_pos, slider, children) in &ui.sliders {
         if *interaction == Interaction::Pressed
             && let Some(pos) = cursor_pos.normalized
@@ -389,6 +405,7 @@ pub fn settings_action(mut ui: SettingsUiQuery) {
         }
     }
 
+    //obsługa przycisków zmiany punktacji
     for (interaction, action, label_type) in &ui.label_buttons {
         if *interaction == Interaction::Pressed {
             match action {
@@ -433,6 +450,7 @@ pub fn settings_action(mut ui: SettingsUiQuery) {
                 _ => {}
             }
 
+            //aktualizacja wyświetlanych wartości punktacji
             for (mut text, label_type) in &mut ui.labels {
                 text.0 = match label_type {
                     ScoreLabel::Win => ui.settings.win_score.to_string(),
@@ -445,6 +463,7 @@ pub fn settings_action(mut ui: SettingsUiQuery) {
         }
     }
 
+    //obsługa przyciku BACK w zależności od stanu gry (z którego menu zostało wywołane)
     for (interaction, action) in &ui.back_buttons {
         if *interaction == Interaction::Pressed && matches!(action, SettingsButtonAction::Back) {
             match ui.current_state.get() {

@@ -10,6 +10,7 @@ type StartInteractionQuery<'w, 's> = Query<
     (Changed<Interaction>, With<Button>),
 >;
 
+//Typy przycisków
 #[derive(Component)]
 pub enum MenuButtonAction {
     Play,
@@ -45,6 +46,8 @@ pub fn start_menu(mut commands: Commands) {
                     ..default()
                 },
             ));
+
+            //Spawn przycisków menu
             let button_labels = [
                 ("START", MenuButtonAction::Play),
                 ("HOW TO PLAY", MenuButtonAction::HowToPlay),
@@ -84,6 +87,7 @@ pub fn start_menu(mut commands: Commands) {
         });
 }
 
+//Obsługa przycisków
 pub fn menu_action(
     interaction_query: StartInteractionQuery,
     mut next_state: ResMut<NextState<crate::scenes::game_state::GameState>>,

@@ -89,8 +89,9 @@ pub fn player_movement(
                     movement_x = -time.delta_secs();
                 }
 
-                //Movement y
+                //Jump
                 if keyboard_input.just_pressed(KeyCode::ArrowUp) && player.jump {
+                    //tylko gdy stoi na ziemi
                     commands.spawn((
                         AudioPlayer::new(audio_assets.jump.clone()),
                         PlaybackSettings {
@@ -106,6 +107,8 @@ pub fn player_movement(
                 }
             }
         }
+
+        //movement y
         if player.y_move > 0.0 {
             movement_y = f32::min(player.y_move, time.delta_secs() * player.jump_speed);
             player.y_move -= movement_y;

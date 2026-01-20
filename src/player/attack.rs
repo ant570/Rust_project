@@ -2,6 +2,7 @@ use crate::player::core::{Control, Player};
 use crate::player::spawn::ChargeBar;
 use crate::player::spawn::Collider;
 use crate::player::spawn::ScoreText;
+use crate::scenes::menu::settings::Settings;
 use crate::scenes::world::utils::WORLD_WIDTH;
 use bevy::input::ButtonInput;
 use bevy::prelude::*;
@@ -74,6 +75,7 @@ pub fn stick_attack(
     mut sticks: StickQuery,
     mut score_texts: ScoreTextQuery,
     mut charge_bars: ChargeBarQuery,
+    settings: Res<Settings>,
 ) {
     for (_entity, mut transform, collider, player, mut state, children) in players.iter_mut() {
         let (left_pressed, right_pressed, attack_pressed) = match player.control {
@@ -175,6 +177,7 @@ pub fn stick_attack(
                 let push = FORCE_BASE + state1.release_charge * FORCE_PER_CHARGE;
                 transform2.translation.x += state1.facing * push;
                 player2_component.pos.x = transform2.translation.x;
+                player1_component.points += settings.damage_score;
             }
         }
 
@@ -193,6 +196,7 @@ pub fn stick_attack(
                 let push = FORCE_BASE + state2.release_charge * FORCE_PER_CHARGE;
                 transform1.translation.x += state2.facing * push;
                 player1_component.pos.x = transform1.translation.x;
+                player2_component.points += settings.damage_score;
             }
         }
     }

@@ -13,6 +13,7 @@ type PauseInteractionQuery<'w, 's> = Query<
 type WorldEntitiesQuery<'w, 's> =
     Query<'w, 's, Entity, (Without<Camera>, Without<DirectionalLight>, Without<Window>)>;
 
+//Typy przycisków
 #[derive(Component)]
 pub enum MenuButtonAction {
     Continue,
@@ -23,6 +24,7 @@ pub enum MenuButtonAction {
     Exit,
 }
 
+//Menu pauzy
 pub fn pause_menu(mut commands: Commands) {
     commands
         .spawn((
@@ -59,6 +61,7 @@ pub fn pause_menu(mut commands: Commands) {
                 ("EXIT", MenuButtonAction::Exit),
             ];
 
+            //spawnowanie przycisków
             for (label, action) in button_labels {
                 parent
                     .spawn((
@@ -98,6 +101,7 @@ pub fn pause_menu_action(
     mut commands: Commands,
     query: WorldEntitiesQuery,
 ) {
+    //obsługa przycisków
     for (interaction, action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match action {

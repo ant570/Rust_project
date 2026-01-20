@@ -240,6 +240,7 @@ pub fn player_with_coin_collision_system(
             let coin_size = coin_sprite.custom_size.unwrap_or(Vec2::ZERO);
             let coin_pos = coin_transform.translation.truncate();
 
+            //sprawdzenie kolizji
             if aabb_collision(player_pos, player_size, coin_pos, coin_size) {
                 commands.spawn((
                     AudioPlayer::new(audio_assets.coin_pickup.clone()),
@@ -251,7 +252,7 @@ pub fn player_with_coin_collision_system(
                     SoundType(AudioSettingType::Coin),
                 ));
 
-                player.points += settings.coin_score;
+                player.points += settings.coin_score; //dodanie punktów
                 commands.entity(coin_entity).try_despawn();
             }
         }

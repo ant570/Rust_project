@@ -18,8 +18,8 @@ use bevy::prelude::AudioSinkPlayback;
 use bevy::prelude::DetectChanges;
 use bevy::prelude::{AudioSource, Handle};
 
+//Handle do nagrań
 #[derive(Resource)]
-
 pub struct GameAudio {
     pub coin_pickup: Handle<AudioSource>,
     pub damage: Handle<AudioSource>,
@@ -42,6 +42,8 @@ impl Plugin for PlatformerGamePluginAudio {
             .add_systems(Update, cleanup_audio_flood);
     }
 }
+
+//Załadowanie plików
 fn load_audio(mut commands: Commands, asset_server: Res<AssetServer>) {
     let coin_sound = asset_server.load("sounds/coin.wav");
     let damage_sound = asset_server.load("sounds/damage.wav");
@@ -59,6 +61,7 @@ fn load_audio(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
+//Muzyka w tle
 fn play_background_music(
     mut commands: Commands,
     audio_assets: Option<Res<GameAudio>>,
@@ -79,6 +82,7 @@ fn play_background_music(
     }
 }
 
+//Aktualizacja ustawień głośności.
 fn sync_volume_settings(
     settings: Res<settings::Settings>,
     mut query: Query<(&SoundType, &mut PlaybackSettings, Option<&mut AudioSink>)>,
@@ -107,6 +111,7 @@ fn sync_volume_settings(
     }
 }
 
+//Usuwanie pustych, zakończonych dźwięków
 pub fn cleanup_audio_flood(
     mut commands: Commands,
     query: Query<(Entity, &AudioSink, &SoundType), With<SoundType>>,

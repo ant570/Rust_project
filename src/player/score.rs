@@ -2,6 +2,7 @@ use crate::player::core::Player;
 use crate::player::spawn::ScoreText;
 use bevy::prelude::*;
 
+//Aktualizacja wyświetlanej punktacji
 pub fn update_score_text(
     query: Query<(&Player, &Children)>,
     mut text_query: Query<&mut Text2d, With<ScoreText>>,
@@ -15,6 +16,7 @@ pub fn update_score_text(
     }
 }
 
+//Sprawdzenie czy któryś z graczy osiągnął zwycięzki wynik
 pub fn check_win_condition(
     player_query: Query<&Player>,
     settings: Res<crate::scenes::menu::settings::Settings>,
