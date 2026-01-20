@@ -117,6 +117,6 @@ pub fn player_movement(
         transform.translation.x += movement_x * player.speed_x;
         movement_y -= time.delta_secs() * player.gravity; //grawitacja
         transform.translation.y += movement_y;
-        player.pos.y += movement_y; 
+        player.pos.y += movement_y;
     }
 }
